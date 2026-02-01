@@ -1,7 +1,22 @@
 ﻿services:
-  archie health trackerarchiehealthtracker:
-    image: archie health trackerarchiehealthtracker
+  archi_health_tracker:
+    image: archi_health_tracker
     build:
       context: .
       dockerfile: Dockerfile
+      
+  db:
+    image: mysql:8.0
+    container_name: archie_mysql
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
 
+volumes:
+  db_data:
+
+    

@@ -488,4 +488,4 @@ riderModule.iml
 /_ReSharper.Caches/
 appsettings.json
 .idea/
-
+.env
