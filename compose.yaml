@@ -1,0 +1,7 @@
+﻿services:
+  archie health trackerarchiehealthtracker:
+    image: archie health trackerarchiehealthtracker
+    build:
+      context: .
+      dockerfile: Dockerfile
+
