@@ -1,5 +1,6 @@
 ﻿using ArchieHealthTracker.Bot;
 using ArchieHealthTracker.Data;
+using ArchieHealthTracker.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,8 @@ var builder = Host.CreateApplicationBuilder(args);
 var dbConnectionString = builder.Configuration.GetConnectionString("Database");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(dbConnectionString, ServerVersion.AutoDetect(dbConnectionString)));
 
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddHostedService<BotService>();
 
 var host = builder.Build();

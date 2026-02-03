@@ -1,4 +1,6 @@
+using ArchieHealthTracker.Repositories;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
@@ -13,13 +15,17 @@ public class BotService : BackgroundService
 {
     private readonly ITelegramBotClient _botClient;
     private readonly ILogger<BotService> _logger;
+    private readonly IConfiguration _configuration;
+    private readonly IServiceScopeFactory _scopeFactory;
 
-    public BotService(IConfiguration config, ILogger<BotService> logger)
+    public BotService(IConfiguration config, ILogger<BotService> logger, IServiceScopeFactory scopeFactory)
     {
-        _logger = logger;
         var token = config["BotConfiguration:Token"] ??
                     throw new ArgumentNullException("Token for Bot not found in config");
         _botClient = new TelegramBotClient(token);
+        _logger = logger;
+        _configuration = config;
+        _scopeFactory = scopeFactory;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -47,17 +53,32 @@ public class BotService : BackgroundService
     
     private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
-        if (update.Message is not { } message) return;
+        if (update.Message is not { } message || message.From is null) return;
         if (message.Text is not {} messageText) return;
         
-        var chatId  = message.Chat.Id;
-        _logger.LogDebug($"Message received '{messageText}' in chat {chatId}");
-        
-        // Echo response just for testing
-        await botClient.SendMessage(
-            chatId: chatId,
-            text: $"Handled:  {messageText}",
-            cancellationToken: cancellationToken);
+        var allowedUsers = _configuration.GetSection("BotConfiguration:AllowedUsers").Get<long[]>() ?? Array.Empty<long>();
+        if (!allowedUsers.Contains(message.From.Id))
+        {
+            _logger.LogWarning($"Попытка доступа от неизвестного пользователя: {message.From.Id}");
+            return;
+        }
+
+        using (var scope = _scopeFactory.CreateScope())
+        {
+            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+            var user = await userRepository.GetOrCreateUser(message.From.Id, message.From.FirstName,
+                message.From.Username);
+
+
+            var chatId = message.Chat.Id;
+            _logger.LogDebug($"Message received '{messageText}' in chat {chatId}");
+
+            // Echo response just for testing
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: $"Handled:  {messageText}",
+                cancellationToken: cancellationToken);
+        }
     }
 
     private Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception,
