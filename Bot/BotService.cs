@@ -1,13 +1,11 @@
-using ArchieHealthTracker.Repositories;
+using ArchieHealthTracker.Bot.Handlers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
-using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
 namespace ArchieHealthTracker.Bot;
 
@@ -18,6 +16,27 @@ public class BotService : BackgroundService
     private readonly IConfiguration _configuration;
     private readonly IServiceScopeFactory _scopeFactory;
 
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        _logger.LogInformation("Starting bot");
+        
+        var receiverOptions = new ReceiverOptions
+        {
+            AllowedUpdates = []
+        };
+        _botClient.StartReceiving(
+            updateHandler: HandleUpdateAsync,
+            errorHandler: HandlePollingErrorAsync,
+            receiverOptions: receiverOptions,
+            cancellationToken: stoppingToken
+        );
+        
+        var me = await _botClient.GetMe(stoppingToken);
+        _logger.LogInformation($"Бот {me.Username} успешно запущен и слушает сообщения.");
+        
+        await Task.Delay(Timeout.Infinite, stoppingToken);
+    }
+
     public BotService(IConfiguration config, ILogger<BotService> logger, IServiceScopeFactory scopeFactory)
     {
         var token = config["BotConfiguration:Token"] ??
@@ -27,70 +46,24 @@ public class BotService : BackgroundService
         _configuration = config;
         _scopeFactory = scopeFactory;
     }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
     {
-        _logger.LogInformation("Bot started");
+        using var scope = _scopeFactory.CreateScope();
         
-        // TODO: support polling for debug mode and webhook for production
-        var receiverOptions = new ReceiverOptions
+        var handler = scope.ServiceProvider.GetRequiredService<UpdateHandler>();
+        
+        try {
+            await handler.HandlerAsync(botClient, update, ct);
+        }
+        catch (Exception ex)
         {
-            AllowedUpdates = Array.Empty<UpdateType>()
-        };
-        
-        _botClient.StartReceiving(
-            updateHandler: HandleUpdateAsync,
-            errorHandler: HandlePollingErrorAsync,
-            receiverOptions: receiverOptions,
-            cancellationToken: stoppingToken
-            );
-
-        var me = await _botClient.GetMe(stoppingToken);
-        _logger.LogInformation($"Bot started: @{me.Username}");
-        
-        await Task.Delay(Timeout.Infinite, stoppingToken);
+            _logger.LogError(ex, "Error handling update");
+        }
     }
     
-    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    private Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
-        if (update.Message is not { } message || message.From is null) return;
-        if (message.Text is not {} messageText) return;
-        
-        var allowedUsers = _configuration.GetSection("BotConfiguration:AllowedUsers").Get<long[]>() ?? Array.Empty<long>();
-        if (!allowedUsers.Contains(message.From.Id))
-        {
-            _logger.LogWarning($"Попытка доступа от неизвестного пользователя: {message.From.Id}");
-            return;
-        }
-
-        using (var scope = _scopeFactory.CreateScope())
-        {
-            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
-            var user = await userRepository.GetOrCreateUser(message.From.Id, message.From.FirstName,
-                message.From.Username);
-
-
-            var chatId = message.Chat.Id;
-            _logger.LogDebug($"Message received '{messageText}' in chat {chatId}");
-
-            // Echo response just for testing
-            await botClient.SendMessage(
-                chatId: chatId,
-                text: $"Handled:  {messageText}",
-                cancellationToken: cancellationToken);
-        }
-    }
-
-    private Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception,
-        CancellationToken cancellationToken)
-    {
-        var errorMessage = exception switch
-        {
-            ApiRequestException apiRequestException => $"Telegram API Error:\n [{apiRequestException.ErrorCode}\n{apiRequestException.Message}]",
-            _ =>  exception.ToString()
-        };
-        
-        _logger.LogError(errorMessage);
+        _logger.LogError(exception, "Ошибка Telegram API");
         return Task.CompletedTask;
     }
 }
