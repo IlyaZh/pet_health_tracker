@@ -1,6 +1,7 @@
 ﻿using ArchieHealthTracker.Bot;
 using ArchieHealthTracker.Bot.Handlers;
 using ArchieHealthTracker.Bot.Interfaces;
+using ArchieHealthTracker.Configuration;
 using ArchieHealthTracker.Data;
 using ArchieHealthTracker.Repositories;
 using ArchieHealthTracker.Services;
@@ -28,6 +29,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<UpdateHandler>();
 
+builder.Services.Configure<BotConfiguration>(builder.Configuration.GetSection("BotConfiguration"));
 builder.Services.AddHostedService<BotService>();
 
 var host = builder.Build();

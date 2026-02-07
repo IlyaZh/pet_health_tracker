@@ -1,8 +1,10 @@
 using ArchieHealthTracker.Bot.Handlers;
+using ArchieHealthTracker.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -37,11 +39,9 @@ public class BotService : BackgroundService
         await Task.Delay(Timeout.Infinite, stoppingToken);
     }
 
-    public BotService(IConfiguration config, ILogger<BotService> logger, IServiceScopeFactory scopeFactory)
+    public BotService(IConfiguration config, ILogger<BotService> logger, IServiceScopeFactory scopeFactory, IOptions<BotConfiguration> options)
     {
-        var token = config["BotConfiguration:Token"] ??
-                    throw new ArgumentNullException("Token for Bot not found in config");
-        _botClient = new TelegramBotClient(token);
+        _botClient = new TelegramBotClient(options.Value.Token);
         _logger = logger;
         _configuration = config;
         _scopeFactory = scopeFactory;
@@ -49,6 +49,8 @@ public class BotService : BackgroundService
     private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
     {
         using var scope = _scopeFactory.CreateScope();
+        
+        var allowedUsers = _configuration.GetSection("BotConfiguration:AllowedUsers").Get<HashSet<long>>();
         
         var handler = scope.ServiceProvider.GetRequiredService<UpdateHandler>();
         
