@@ -17,7 +17,7 @@ public class CommandExecutor
         _logger = logger;
     }
 
-    public async Task ExecuteCommandAsync(string commandName, ITelegramBotClient bot, Message message, BotUser user, CancellationToken cancellationToken) 
+    public async Task ExecuteCommand(string commandName, ITelegramBotClient bot, Message message, BotUser user, CancellationToken cancellationToken) 
     {
         var command =  _commands.FirstOrDefault(c => commandName.Equals(c.CommandName, StringComparison.OrdinalIgnoreCase));
         if (command == null)

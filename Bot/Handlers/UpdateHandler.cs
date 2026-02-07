@@ -8,38 +8,44 @@ namespace ArchieHealthTracker.Bot.Handlers;
 public class UpdateHandler
 {
     private readonly IUserService _userService;
+    private readonly CommandExecutor _commandExecutor; 
     private readonly ILogger<UpdateHandler> _logger;
 
-    public UpdateHandler(IUserService userService, ILogger<UpdateHandler> logger)
+    public UpdateHandler(
+        IUserService userService, 
+        CommandExecutor commandExecutor, 
+        ILogger<UpdateHandler> logger)
     {
         _userService = userService;
+        _commandExecutor = commandExecutor;
         _logger = logger;
     }
 
     public async Task HandlerAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
     {
-        if (update.Message is { } message && message.Text is { } messageText)
+        if (update.Message is { Text: { } messageText } message)
         {
-            await HandleMessageAsync(botClient, message, ct);
+            await HandleUpdateAsync(botClient, message, messageText, ct);
+        }
+        else if (update.CallbackQuery is { Data: { } callbackData } callback)
+        {
+            await HandleUpdateAsync(botClient, callback.Message!, callbackData, ct);
         }
     }
     
-    private async Task HandleMessageAsync(ITelegramBotClient botClient, Message message, CancellationToken ct)
+    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Message message, string text, CancellationToken ct)
     {
-        var from = message.From!;
+        var from = message.From;
+        if (from == null)
+        {
+            _logger.LogWarning("Получено сообщение без отправителя (From is null). MessageId: {Id}", message.Id);
+            return;
+        }
         
-        // Вызываем бизнес-логику
         var (user, isNew) = await _userService.RegisterUserAsync(from.Id, from.FirstName, from.Username);
-
-        if (isNew)
-        {
-            await botClient.SendMessage(message.Chat.Id, 
-                $"Привет, {user.FirstName}! Я новый трекер для Арчи. Добро пожаловать!", cancellationToken: ct);
-        }
-        else
-        {
-            await botClient.SendMessage(message.Chat.Id, 
-                $"С возвращением, {user.FirstName}. Жду команды.", cancellationToken: ct);
-        }
+        
+        _logger.LogInformation("Обработка сообщения от {UserId}: {Text}", user.TelegramId, text);
+        
+        await _commandExecutor.ExecuteCommand(text, botClient, message, user, ct);
     }
 }
