@@ -1,5 +1,6 @@
 ﻿using ArchieHealthTracker.Bot;
 using ArchieHealthTracker.Bot.Handlers;
+using ArchieHealthTracker.Bot.Interfaces;
 using ArchieHealthTracker.Data;
 using ArchieHealthTracker.Repositories;
 using ArchieHealthTracker.Services;
@@ -12,6 +13,14 @@ var builder = Host.CreateApplicationBuilder(args);
 
 var dbConnectionString = builder.Configuration.GetConnectionString("Database");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(dbConnectionString, ServerVersion.AutoDetect(dbConnectionString)));
+
+builder.Services.Scan(scan => scan
+    .FromAssemblyOf<ITelegramCommand>()
+    .AddClasses(classes => classes.AssignableTo<ITelegramCommand>())
+    .AsImplementedInterfaces()
+    .WithScopedLifetime());
+builder.Services.AddScoped<CommandExecutor>();
+builder.Services.AddScoped<UpdateHandler>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
