@@ -6,13 +6,14 @@ namespace ArchieHealthTracker.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
-    
-    public  UserService(IUserRepository userRepository)
+
+    public UserService(IUserRepository userRepository)
     {
         _userRepository = userRepository;
     }
 
-    public async Task<(BotUser User, bool IsNew)> RegisterUserAsync(long telegramId, string firstName, string? username, CancellationToken ct)
+    public async Task<(BotUser User, bool IsNew)> RegisterUserAsync(long telegramId, string firstName, string? username,
+        CancellationToken ct)
     {
         var user = await _userRepository.GetByTelegramIdAsync(telegramId, ct);
         if (user != null)
@@ -20,7 +21,8 @@ public class UserService : IUserService
             return (user, false);
         }
 
-        user = new BotUser{
+        user = new BotUser
+        {
             Id = Guid.CreateVersion7(),
             TelegramId = telegramId,
             FirstName = firstName,
@@ -28,9 +30,8 @@ public class UserService : IUserService
             TimeZoneId = "Central European Standard Time",
             CreatedAt = DateTime.UtcNow
         };
-            await _userRepository.AddAsync(user, ct);
-                
-                return (user, true);
-    }
+        await _userRepository.AddAsync(user, ct);
 
+        return (user, true);
+    }
 }

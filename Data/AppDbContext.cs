@@ -13,11 +13,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.Entity<BotUser>()
             .HasIndex(u => u.TelegramId)
             .IsUnique();
-        
+
         modelBuilder.Entity<BotUser>()
             .HasMany(u => u.Events)
             .WithOne(e => e.BotUser)
@@ -28,13 +28,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.ToTable("weight");
 
             entity.HasIndex(e => e.Date).IsUnique();
-            
+
             entity.Property(e => e.Weight)
                 .HasConversion(
                     v => v.Value,
                     v => Weight.FromKilograms(v))
                 .HasPrecision(5, 2)
-                .HasColumnType("decimal(5,2)") 
+                .HasColumnType("decimal(5,2)")
                 .HasColumnName("weight_kg");
             entity.HasOne(e => e.User)
                 .WithMany()
@@ -56,5 +56,4 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }
-
 }

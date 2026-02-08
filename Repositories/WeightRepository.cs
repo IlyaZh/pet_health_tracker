@@ -14,8 +14,8 @@ public class WeightRepository : IWeightRepository
     {
         _context = context;
         _logger = logger;
-    } 
-    
+    }
+
     public async Task UpsertWeight(WeightEntry entry, CancellationToken ct)
     {
         var existing = await _context.Weights.FirstOrDefaultAsync(e => e.Date == entry.Date, ct);
@@ -23,14 +23,14 @@ public class WeightRepository : IWeightRepository
         {
             existing.Weight = entry.Weight;
             existing.UserId = entry.Id;
-            
+
             _logger.LogDebug("Обновлена запись веса за {Date}", existing.Date);
         }
         else
         {
             await _context.Weights.AddAsync(entry, ct);
         }
-        await  _context.SaveChangesAsync(ct);
-        
+
+        await _context.SaveChangesAsync(ct);
     }
 }

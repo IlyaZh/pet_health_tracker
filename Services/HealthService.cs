@@ -5,29 +5,28 @@ using Telegram.Bot.Types;
 
 namespace ArchieHealthTracker.Services;
 
-
-
 public class HealthService : IHealthService
 {
     private readonly IWeightRepository _weightRepository;
     private readonly IHygieneRepository _hygieneRepository;
-    
-    public HealthService(IWeightRepository weightRepository,  IHygieneRepository hygieneRepository)
+
+    public HealthService(IWeightRepository weightRepository, IHygieneRepository hygieneRepository)
     {
         _weightRepository = weightRepository;
         _hygieneRepository = hygieneRepository;
     }
-    
-    public async Task AddWeight(BotUser user,  Weight weight, CancellationToken ct)
+
+    public async Task AddWeight(BotUser user, Weight weight, CancellationToken ct)
     {
         var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(user.TimeZoneId);
         var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, userTimeZone));
-        
-        var entry = new WeightEntry{
-            Weight= weight,
-            Date=  today,
-            UserId= user.Id
-            };
+
+        var entry = new WeightEntry
+        {
+            Weight = weight,
+            Date = today,
+            UserId = user.Id
+        };
         await _weightRepository.UpsertWeight(entry, ct);
     }
 

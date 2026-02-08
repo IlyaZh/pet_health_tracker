@@ -8,12 +8,15 @@ namespace ArchieHealthTracker.Bot.Commands;
 public class SymptomeCommand : ITelegramCommand
 {
     public string CommandName { get; } = "symptome";
-    public Task ExecuteAsync(ITelegramBotClient botClient, Message message, BotUser user, CancellationToken cancellationToken)
+
+    public Task ExecuteAsync(ITelegramBotClient botClient, Message message, BotUser user,
+        CancellationToken ct)
     {
         throw new NotImplementedException();
     }
 
-    public Task HandleInputAsync(ITelegramBotClient botClient, Message message, BotUser user, CancellationToken cancellationToken)
+    public Task HandleInputAsync(ITelegramBotClient botClient, UserSession session, Message message, BotUser user,
+        CancellationToken ct)
     {
         throw new NotImplementedException();
     }

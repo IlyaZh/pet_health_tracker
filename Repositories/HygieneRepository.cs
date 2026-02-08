@@ -11,10 +11,10 @@ public class HygieneRepository : IHygieneRepository
     {
         _dbContext = dbContext;
     }
-    
+
     public async Task AddEvent(HygieneEntry entry, CancellationToken ct)
     {
-        await  _dbContext.AddAsync(entry, ct);
+        await _dbContext.AddAsync(entry, ct);
         await _dbContext.SaveChangesAsync(ct);
     }
 }

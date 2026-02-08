@@ -4,7 +4,7 @@
     build:
       context: .
       dockerfile: Dockerfile
-      
+  
   db:
     image: mysql:8.0
     container_name: archie_mysql

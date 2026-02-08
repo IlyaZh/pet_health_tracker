@@ -13,7 +13,8 @@ using Microsoft.Extensions.Hosting;
 var builder = Host.CreateApplicationBuilder(args);
 
 var dbConnectionString = builder.Configuration.GetConnectionString("Database");
-builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(dbConnectionString, ServerVersion.AutoDetect(dbConnectionString)));
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(dbConnectionString, ServerVersion.AutoDetect(dbConnectionString)));
 
 builder.Services.Scan(scan => scan
     .FromAssemblyOf<ITelegramCommand>()

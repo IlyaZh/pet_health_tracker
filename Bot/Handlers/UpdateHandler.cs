@@ -25,25 +25,24 @@ public class UpdateHandler
         _commandExecutor = commandExecutor;
         _logger = logger;
         _allowedUsers = botConfiguration.Value.AllowedUsers;
-
     }
 
     public async Task HandlerAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
     {
         if (update.Message is { Text: { } messageText } message)
         {
-            await HandleUpdateAsync(botClient, message, messageText, ct);
+            await HandleUpdateAsync(botClient, message, message.From, messageText, ct);
         }
         else if (update.CallbackQuery is { Data: { } callbackData } callback)
         {
-            await HandleUpdateAsync(botClient, callback.Message!, callbackData, ct);
+            await HandleUpdateAsync(botClient, callback.Message!, callback.From, callbackData, ct);
+            await botClient.AnswerCallbackQuery(callback.Id, cancellationToken: ct);
         }
     }
 
-    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Message message, string text,
+    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Message message,  User? from, string text,
         CancellationToken ct)
     {
-        var from = message.From;
         if (from == null)
         {
             _logger.LogWarning("Получено сообщение без отправителя (From is null). MessageId: {Id}", message.Id);

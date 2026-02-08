@@ -13,35 +13,38 @@ public class CommandExecutor
     private readonly ILogger<CommandExecutor> _logger;
     private readonly IUserSessionService _userSessionService;
 
-    public CommandExecutor(IEnumerable<ITelegramCommand> commands, ILogger<CommandExecutor> logger,  IUserSessionService userSessionService)
+    public CommandExecutor(IEnumerable<ITelegramCommand> commands, ILogger<CommandExecutor> logger,
+        IUserSessionService userSessionService)
     {
         _commands = commands;
         _logger = logger;
-        _userSessionService =  userSessionService;
+        _userSessionService = userSessionService;
     }
 
-    public async Task ExecuteCommand(string commandName, ITelegramBotClient bot, Message message, BotUser user, CancellationToken cancellationToken) 
+    public async Task ExecuteCommand(string commandName, ITelegramBotClient bot, Message message, BotUser user,
+        CancellationToken ct)
     {
-        var activeCommandName = _userSessionService.GetCurrentCommand(user.Id);
+        var userSession = _userSessionService.GetCurrentState(user.Id);
 
-        if (!string.IsNullOrEmpty(activeCommandName))
+        if (userSession != null)
         {
-            var activeCommand = _commands.FirstOrDefault(c => c.CommandName == activeCommandName);
+            var activeCommand = _commands.FirstOrDefault(c => c.CommandName == userSession.Value.CommandName);
             if (activeCommand != null)
             {
-                await activeCommand.HandleInputAsync(bot, message, user, cancellationToken);
+                await activeCommand.HandleInputAsync(bot, userSession.Value, message, user, ct);
                 return;
             }
         }
 
-        var command =  _commands.FirstOrDefault(c => commandName.Equals(c.CommandName, StringComparison.OrdinalIgnoreCase));
+        var command =
+            _commands.FirstOrDefault(c => commandName.Equals(c.CommandName, StringComparison.OrdinalIgnoreCase));
         if (command == null)
         {
-            await bot.SendMessage(message.Chat.Id, "Я не знаю такую команду 🤔", cancellationToken: cancellationToken);
+            await bot.SendMessage(message.Chat.Id, "Я не знаю такую команду 🤔", cancellationToken: ct);
             _logger.LogWarning("Unknown command: {CommandName}", commandName);
             return;
         }
-        
-        await command.ExecuteAsync(bot, message, user, cancellationToken);
+
+        await command.ExecuteAsync(bot, message, user, ct);
     }
 }
