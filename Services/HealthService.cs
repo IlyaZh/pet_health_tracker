@@ -9,9 +9,23 @@ namespace ArchieHealthTracker.Services;
 
 public class HealthService : IHealthService
 {
-    // private readonly IHealthRepository _healthRepository;
-    public Task AddWeight(BotUser user,  Weight weight)
+    private readonly IWeightRepository _weightRepository;
+    
+    public HealthService(IWeightRepository weightRepository)
     {
-        throw new NotImplementedException();
+        _weightRepository = weightRepository;
+    }
+    
+    public async Task AddWeight(BotUser user,  Weight weight, CancellationToken ct)
+    {
+        var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(user.TimeZoneId);
+        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, userTimeZone));
+        
+        var entry = new WeightEntry{
+            Weight= weight,
+            Date=  today,
+            UserId= user.Id
+            };
+        await _weightRepository.UpsertWeight(entry, ct);
     }
 }

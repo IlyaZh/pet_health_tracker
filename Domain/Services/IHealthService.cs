@@ -4,5 +4,5 @@ namespace ArchieHealthTracker.Repositories;
 
 public interface IHealthService
 {
-        Task AddWeight(BotUser user,  Weight weight);
+        Task AddWeight(BotUser user, Weight weight, CancellationToken ct);
 }
