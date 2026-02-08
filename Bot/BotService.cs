@@ -53,8 +53,9 @@ public class BotService : BackgroundService
         var allowedUsers = _configuration.GetSection("BotConfiguration:AllowedUsers").Get<HashSet<long>>();
         
         var handler = scope.ServiceProvider.GetRequiredService<UpdateHandler>();
-        
-        try {
+
+        try
+        {
             await handler.HandlerAsync(botClient, update, ct);
         }
         catch (Exception ex)

@@ -10,13 +10,13 @@ namespace ArchieHealthTracker.Bot.Handlers;
 public class UpdateHandler
 {
     private readonly IUserService _userService;
-    private readonly CommandExecutor _commandExecutor; 
+    private readonly CommandExecutor _commandExecutor;
     private readonly ILogger<UpdateHandler> _logger;
     private readonly HashSet<long> _allowedUsers;
 
     public UpdateHandler(
-        IUserService userService, 
-        CommandExecutor commandExecutor, 
+        IUserService userService,
+        CommandExecutor commandExecutor,
         ILogger<UpdateHandler> logger,
         IOptions<BotConfiguration> botConfiguration)
     {
@@ -38,8 +38,9 @@ public class UpdateHandler
             await HandleUpdateAsync(botClient, callback.Message!, callbackData, ct);
         }
     }
-    
-    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Message message, string text, CancellationToken ct)
+
+    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Message message, string text,
+        CancellationToken ct)
     {
         var from = message.From;
         if (from == null)
@@ -55,10 +56,18 @@ public class UpdateHandler
             return;
         }
 
-        var (user, isNew) = await _userService.RegisterUserAsync(from.Id, from.FirstName, from.Username);
-        
-        _logger.LogInformation("Обработка сообщения от {UserId}: {Text}", user.TelegramId, text);
-        
-        await _commandExecutor.ExecuteCommand(text, botClient, message, user, ct);
+        try
+        {
+            var (user, isNew) = await _userService.RegisterUserAsync(from.Id, from.FirstName, from.Username);
+
+            _logger.LogInformation("Обработка сообщения от {UserId}: {Text}", user.TelegramId, text);
+
+            await _commandExecutor.ExecuteCommand(text, botClient, message, user, ct);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, "Error handling update, argument exception");
+            await botClient.SendMessage(message.Chat.Id, $"❌ {ex.Message}", cancellationToken: ct);
+        }
     }
 }
