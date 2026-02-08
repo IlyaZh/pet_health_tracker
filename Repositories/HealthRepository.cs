@@ -1,6 +1,6 @@
 namespace ArchieHealthTracker.Repositories;
 
-public interface IHealthService
+public class HealthRepository
 {
     
 }

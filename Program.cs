@@ -27,6 +27,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<UserSessionService>();
+
 builder.Services.AddScoped<UpdateHandler>();
 
 builder.Services.Configure<BotConfiguration>(builder.Configuration.GetSection("BotConfiguration"));
