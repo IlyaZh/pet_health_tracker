@@ -8,6 +8,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<BotUser> Users { get; set; }
     public DbSet<HealthEvent> Events { get; set; }
     public DbSet<WeightEntry> Weights { get; set; }
+    public DbSet<HygieneEntry> Hygiene { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,7 +36,21 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasPrecision(5, 2)
                 .HasColumnType("decimal(5,2)") 
                 .HasColumnName("weight_kg");
-            entity.HasOne(e => e.BotUser)
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<HygieneEntry>(entity =>
+        {
+            entity.ToTable("hygiene");
+            entity.HasIndex(e => e.Date);
+            entity.HasIndex(e => e.Event);
+
+            entity.Property(e => e.Event)
+                .HasConversion<string>();
+            entity.HasOne(e => e.User)
                 .WithMany()
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Cascade);

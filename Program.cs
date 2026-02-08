@@ -25,6 +25,7 @@ builder.Services.AddScoped<UpdateHandler>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IWeightRepository, WeightRepository>();
+builder.Services.AddScoped<IHygieneRepository, HygieneRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IHealthService, HealthService>();

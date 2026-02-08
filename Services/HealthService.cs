@@ -10,10 +10,12 @@ namespace ArchieHealthTracker.Services;
 public class HealthService : IHealthService
 {
     private readonly IWeightRepository _weightRepository;
+    private readonly IHygieneRepository _hygieneRepository;
     
-    public HealthService(IWeightRepository weightRepository)
+    public HealthService(IWeightRepository weightRepository,  IHygieneRepository hygieneRepository)
     {
         _weightRepository = weightRepository;
+        _hygieneRepository = hygieneRepository;
     }
     
     public async Task AddWeight(BotUser user,  Weight weight, CancellationToken ct)
@@ -27,5 +29,11 @@ public class HealthService : IHealthService
             UserId= user.Id
             };
         await _weightRepository.UpsertWeight(entry, ct);
+    }
+
+    public async Task AddHygiene(BotUser user, HygieneEventType type, CancellationToken ct)
+    {
+        var entry = new HygieneEntry { };
+        await _hygieneRepository.AddEvent(entry, ct);
     }
 }

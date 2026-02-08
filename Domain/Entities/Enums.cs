@@ -10,3 +10,11 @@ public enum HealthEventType
     Hygiene = 5,       // Когти, зубы
     Food = 6           // Смена корма / реакция
 }
+
+public enum HygieneEventType
+{
+    Unknown = 0,    // Защита от дефолтных значений
+    Nails = 1,      // Стрижка когтей
+    Glands = 2,     // Чистка желез
+    Teeth = 3      // Чистка зубов
+}

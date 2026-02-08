@@ -12,5 +12,5 @@ public class WeightEntry
         
         public Guid UserId { get; set; }
         
-        public BotUser BotUser { get; set; } = null!;
+        public BotUser User { get; set; } = null!;
 }
