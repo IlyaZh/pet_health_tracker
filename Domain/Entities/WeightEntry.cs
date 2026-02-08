@@ -2,7 +2,7 @@ namespace ArchieHealthTracker.Entities;
 
 public class WeightEntry
 {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.CreateVersion7();
         
         public Weight Weight { get; set; }
         

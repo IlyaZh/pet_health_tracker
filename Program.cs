@@ -24,8 +24,10 @@ builder.Services.AddScoped<CommandExecutor>();
 builder.Services.AddScoped<UpdateHandler>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IWeightRepository, WeightRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IHealthService, HealthService>();
 
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<UserSessionService>();

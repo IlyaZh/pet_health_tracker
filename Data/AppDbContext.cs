@@ -7,6 +7,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<BotUser> Users { get; set; }
     public DbSet<HealthEvent> Events { get; set; }
+    public DbSet<WeightEntry> Weights { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -24,6 +25,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<WeightEntry>(entity =>
         {
             entity.ToTable("weight");
+
+            entity.HasIndex(e => e.Date).IsUnique();
+            
             entity.Property(e => e.Weight)
                 .HasConversion(
                     v => v.Value,

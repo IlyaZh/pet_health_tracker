@@ -3,11 +3,6 @@ using ArchieHealthTracker.Repositories;
 
 namespace ArchieHealthTracker.Services;
 
-public interface IUserService
-{
-    Task<(BotUser User, bool IsNew)> RegisterUserAsync(long telegramId, string firstName, string? username);
-}
-
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
@@ -17,9 +12,9 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
 
-    public async Task<(BotUser User, bool IsNew)> RegisterUserAsync(long telegramId, string firstName, string? username)
+    public async Task<(BotUser User, bool IsNew)> RegisterUserAsync(long telegramId, string firstName, string? username, CancellationToken ct)
     {
-        var user = await _userRepository.GetByTelegramIdAsync(telegramId);
+        var user = await _userRepository.GetByTelegramIdAsync(telegramId, ct);
         if (user != null)
         {
             return (user, false);
@@ -33,8 +28,7 @@ public class UserService : IUserService
             TimeZoneId = "Central European Standard Time",
             CreatedAt = DateTime.UtcNow
         };
-            await _userRepository.AddAsync(user);
-            await _userRepository.SaveChangesAsync();
+            await _userRepository.AddAsync(user, ct);
                 
                 return (user, true);
     }

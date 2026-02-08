@@ -4,7 +4,6 @@ namespace ArchieHealthTracker.Repositories;
 
 public interface IUserRepository
 {
-    Task<BotUser?> GetByTelegramIdAsync(long telegramId);
-    Task AddAsync(BotUser user);
-    Task SaveChangesAsync();
+    Task<BotUser?> GetByTelegramIdAsync(long telegramId, CancellationToken ct);
+    Task AddAsync(BotUser user, CancellationToken ct);
 }

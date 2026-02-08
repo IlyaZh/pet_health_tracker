@@ -11,18 +11,15 @@ public class UserRepository : IUserRepository
 
     public UserRepository(AppDbContext context) => _context = context;
 
-    public async Task<BotUser?> GetByTelegramIdAsync(long telegramId)
+    public async Task<BotUser?> GetByTelegramIdAsync(long telegramId, CancellationToken ct)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.TelegramId == telegramId);
+        return await _context.Users.FirstOrDefaultAsync(u => u.TelegramId == telegramId, ct);
     }
 
-    public async Task AddAsync(BotUser user)
+    public async Task AddAsync(BotUser user, CancellationToken ct)
     {
-        await _context.Users.AddAsync(user);
+        await _context.Users.AddAsync(user, ct);
+        await _context.SaveChangesAsync(ct);
     }
 
-    public async Task SaveChangesAsync()
-    {
-        await _context.SaveChangesAsync();
-    }
 }

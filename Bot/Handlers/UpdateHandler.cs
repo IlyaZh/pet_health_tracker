@@ -1,4 +1,5 @@
 using ArchieHealthTracker.Configuration;
+using ArchieHealthTracker.Repositories;
 using ArchieHealthTracker.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -58,7 +59,7 @@ public class UpdateHandler
 
         try
         {
-            var (user, isNew) = await _userService.RegisterUserAsync(from.Id, from.FirstName, from.Username);
+            var (user, isNew) = await _userService.RegisterUserAsync(from.Id, from.FirstName, from.Username, ct);
 
             _logger.LogInformation("Обработка сообщения от {UserId}: {Text}", user.TelegramId, text);
 
