@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<WeightEntry> Weights { get; set; }
     public DbSet<HygieneEntry> Hygiene { get; set; }
     public DbSet<SymptomEntry> Symptoms { get; set; } 
+    public DbSet<MedicalEventEntry> MedicalEvents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -63,6 +64,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             symptom.HasOne(s => s.User)
                 .WithMany()
                 .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<MedicalEventEntry>(medicalEvent =>
+        {
+            medicalEvent.ToTable("medical_events");
+            medicalEvent.HasIndex(e => e.Date);
+            medicalEvent.HasIndex(e => e.NextPlannedDate);
+            medicalEvent.Property(e => e.Type)
+                .HasConversion<string>();
+            medicalEvent.HasIndex(e => e.Type);
+            medicalEvent.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

@@ -54,3 +54,12 @@ public enum SymptomType
     [Description("Другое ❓")]
     Other = 99
 }
+
+public enum MedicalEventType
+{
+    Unknown = 0,
+    [Description("Вакцинация 💉")] Vaccination = 1,
+    [Description("От клещей/глистов 🛡️")] ParasiteTreatment = 2,
+    [Description("Прием лекарств 💊")] Medication = 3,
+    [Description("Осмотр врача 🩺")] VetVisit = 4
+}
