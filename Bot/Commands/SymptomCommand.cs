@@ -11,7 +11,7 @@ namespace ArchieHealthTracker.Bot.Commands;
 
 public class SymptomCommand : ITelegramCommand
 {
-    public string CommandName { get; } = "symptom";
+    public string CommandName { get; } = "/symptom";
     private readonly IUserSessionService _userSessionService;
     private readonly IHealthService _healthService;
 

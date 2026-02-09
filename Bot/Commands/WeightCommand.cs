@@ -19,7 +19,7 @@ public class WeightCommand : ITelegramCommand
         _userSessionService = userSessionService;
     }
 
-    public string CommandName { get; } = "weight";
+    public string CommandName { get; } = "/weight";
 
     public async Task ExecuteAsync(ITelegramBotClient botClient, Message message, BotUser user,
         CancellationToken ct)

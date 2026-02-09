@@ -13,7 +13,7 @@ public class HygieneCommand : ITelegramCommand
 {
     private readonly IUserSessionService _userSessionService;
     private readonly IHealthService _healthService;
-    public string CommandName { get; } = "hygiene";
+    public string CommandName { get; } = "/hygiene";
 
     private readonly string _chooseVariant = "Выбери процедуру для Арчи:";
 
