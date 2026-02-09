@@ -27,3 +27,30 @@ public enum HygieneEventType
     [Description("Чистка зубов 🦷")]
     Teeth = 3
 }
+
+public enum SymptomType
+{
+    [Description("Неизвестно")]
+    Unknown = 0,
+
+    [Description("Рвота 🤮")]
+    Vomiting = 1,
+
+    [Description("Диарея 💩")]
+    Diarrhea = 2,
+
+    [Description("Вялость 🥱")]
+    Lethargy = 3,
+
+    [Description("Отказ от еды 🥣🚫")]
+    LossOfAppetite = 4,
+
+    [Description("Хромота 🐾🩹")]
+    Limping = 5,
+
+    [Description("Зуд / Чес 🧼🐕")]
+    Itching = 6,
+
+    [Description("Другое ❓")]
+    Other = 99
+}

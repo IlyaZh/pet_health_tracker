@@ -28,10 +28,10 @@ public class CommandExecutor
 
         if (userSession != null)
         {
-            var activeCommand = _commands.FirstOrDefault(c => c.CommandName == userSession.Value.CommandName);
+            var activeCommand = _commands.FirstOrDefault(c => c.CommandName == userSession.CommandName);
             if (activeCommand != null)
             {
-                await activeCommand.HandleInputAsync(bot, userSession.Value, message, user, ct);
+                await activeCommand.HandleInputAsync(bot, userSession, message, user, ct);
                 return;
             }
         }

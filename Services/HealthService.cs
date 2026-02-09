@@ -9,17 +9,28 @@ public class HealthService : IHealthService
 {
     private readonly IWeightRepository _weightRepository;
     private readonly IHygieneRepository _hygieneRepository;
+    private readonly ISymptomRepository _symptomRepository;
 
-    public HealthService(IWeightRepository weightRepository, IHygieneRepository hygieneRepository)
+    public HealthService(
+        IWeightRepository weightRepository,
+        IHygieneRepository hygieneRepository,
+        ISymptomRepository symptomRepository
+    )
     {
         _weightRepository = weightRepository;
         _hygieneRepository = hygieneRepository;
+        _symptomRepository = symptomRepository;
+    }
+
+    private DateTime GetNowInUserTimeZone(string timeZoneId)
+    {
+        var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+        return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, userTimeZone);
     }
 
     public async Task AddWeight(BotUser user, Weight weight, CancellationToken ct)
     {
-        var userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(user.TimeZoneId);
-        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, userTimeZone));
+        var today = DateOnly.FromDateTime(GetNowInUserTimeZone(user.TimeZoneId));
 
         var entry = new WeightEntry
         {
@@ -30,9 +41,26 @@ public class HealthService : IHealthService
         await _weightRepository.UpsertWeight(entry, ct);
     }
 
-    public async Task AddHygiene(BotUser user, HygieneEventType type, CancellationToken ct)
+    public async Task AddHygiene(BotUser user, HygieneEventType action, CancellationToken ct)
     {
-        var entry = new HygieneEntry { };
+        var today = DateOnly.FromDateTime(GetNowInUserTimeZone(user.TimeZoneId));
+        var entry = new HygieneEntry
+        {
+            Date = today,
+            Event = action,
+            UserId = user.Id
+        };
         await _hygieneRepository.AddEvent(entry, ct);
+    }
+
+    public async Task AddSymptom(BotUser user, Symptom symptom, CancellationToken ct)
+    {
+        var entry = new SymptomEntry
+        {
+            Symptom = symptom.Type,
+            Note = symptom.Note,
+            UserId = user.Id
+        };
+        await _symptomRepository.AddSymptom(entry, ct);
     }
 }

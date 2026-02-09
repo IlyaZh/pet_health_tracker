@@ -1,7 +1,8 @@
 namespace ArchieHealthTracker.Entities;
 
-public record struct UserSession
+public class UserSession
 {
-    public String CommandName { get; set; }
+    public String CommandName { get; set; } = string.Empty;
     public int MessageId { get; set; }
+    public Dictionary<string, string> Metadata { get; init; } = new();
 }

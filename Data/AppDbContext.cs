@@ -9,6 +9,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<HealthEvent> Events { get; set; }
     public DbSet<WeightEntry> Weights { get; set; }
     public DbSet<HygieneEntry> Hygiene { get; set; }
+    public DbSet<SymptomEntry> Symptoms { get; set; } 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -17,11 +18,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<BotUser>()
             .HasIndex(u => u.TelegramId)
             .IsUnique();
-
-        modelBuilder.Entity<BotUser>()
-            .HasMany(u => u.Events)
-            .WithOne(e => e.BotUser)
-            .HasForeignKey(e => e.BotUserId);
 
         modelBuilder.Entity<WeightEntry>(entity =>
         {
@@ -53,6 +49,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasOne(e => e.User)
                 .WithMany()
                 .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SymptomEntry>(symptom =>
+        {
+            symptom.ToTable("symptoms");
+            symptom.HasIndex(e => e.CreatedAt);
+            symptom.HasIndex(e => e.Symptom);
+
+            symptom.Property(s => s.Symptom)
+                .HasConversion<string>();
+            symptom.HasOne(s => s.User)
+                .WithMany()
+                .HasForeignKey(s => s.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

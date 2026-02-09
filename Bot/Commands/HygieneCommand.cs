@@ -15,7 +15,7 @@ public class HygieneCommand : ITelegramCommand
     private readonly IHealthService _healthService;
     public string CommandName { get; } = "hygiene";
 
-    private string ChooseVariant = "Выбери процедуру для Арчи:";
+    private readonly string _chooseVariant = "Выбери процедуру для Арчи:";
 
     public HygieneCommand(IUserSessionService userSessionService,  IHealthService healthService)
     {
@@ -36,7 +36,7 @@ public class HygieneCommand : ITelegramCommand
 
         var sentMessage = await botClient.SendMessage(
             message.Chat.Id,
-            ChooseVariant,
+            _chooseVariant,
             replyMarkup: keyboard,
             cancellationToken: ct
         );
@@ -60,8 +60,7 @@ public class HygieneCommand : ITelegramCommand
         var parts = text.Split(':');
         if (parts.Length < 2 || !Enum.TryParse<HygieneEventType>(parts[1], out var type))
         {
-            await botClient.SendMessage(message.Chat.Id, "Ошибка: неверный тип процедуры.", cancellationToken: ct);
-            return;
+            throw new ArgumentException($"Invalid hygiene input");
         }
 
         await _healthService.AddHygiene(user, type, ct);
