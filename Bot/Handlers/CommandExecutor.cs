@@ -1,3 +1,4 @@
+using ArchieHealthTracker.Bot.Helpers;
 using ArchieHealthTracker.Bot.Interfaces;
 using ArchieHealthTracker.Entities;
 using ArchieHealthTracker.Services;
@@ -21,7 +22,7 @@ public class CommandExecutor
         _userSessionService = userSessionService;
     }
 
-    public async Task ExecuteCommand(string commandName, ITelegramBotClient bot, Message message, BotUser user,
+    public async Task ExecuteCommand(string text, ITelegramBotClient bot, Message message, BotUser user,
         CancellationToken ct)
     {
         var userSession = _userSessionService.GetCurrentState(user.Id);
@@ -36,8 +37,11 @@ public class CommandExecutor
             }
         }
 
+        var commandName = BotNavigation.Mapper.GetCommand(text) ?? text;
+        var commandKey = commandName.Split(' ')[0];
+
         var command =
-            _commands.FirstOrDefault(c => commandName.Equals(c.CommandName, StringComparison.OrdinalIgnoreCase));
+            _commands.FirstOrDefault(c => commandKey.Equals(c.CommandName, StringComparison.OrdinalIgnoreCase));
         if (command == null)
         {
             await bot.SendMessage(message.Chat.Id, "Я не знаю такую команду 🤔", cancellationToken: ct);

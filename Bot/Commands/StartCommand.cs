@@ -1,5 +1,5 @@
+using ArchieHealthTracker.Bot.Helpers;
 using ArchieHealthTracker.Bot.Interfaces;
-using ArchieHealthTracker.Bot.Keyboards;
 using ArchieHealthTracker.Entities;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -21,7 +21,7 @@ public class StartCommand : ITelegramCommand
             message.Chat.Id,
             welcomeText,
             parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
-            replyMarkup: MainMenuKeyboard.Get(),
+            replyMarkup: BotNavigation.Keyboards.Main,
             cancellationToken: ct
         );
     }
