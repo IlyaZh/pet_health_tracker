@@ -11,15 +11,13 @@ public class MedicalEventEntry
     
     public MedicalEventType Type { get; set; }
     
-    [Required, MaxLength(100)]
+    [Required, MaxLength(128)]
     public string Title { get; set; } = string.Empty;
     
     public DateOnly Date { get; set; }
     
     [MaxLength(50)]
     public string? Dosage { get; set; }
-    
-    public DateOnly? NextPlannedDate { get; set; }
 
     public string? Note { get; set; }
     

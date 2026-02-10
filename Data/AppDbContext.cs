@@ -71,7 +71,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             medicalEvent.ToTable("medical_events");
             medicalEvent.HasIndex(e => e.Date);
-            medicalEvent.HasIndex(e => e.NextPlannedDate);
             medicalEvent.Property(e => e.Type)
                 .HasConversion<string>();
             medicalEvent.HasIndex(e => e.Type);
