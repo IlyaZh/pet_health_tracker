@@ -10,16 +10,19 @@ public class HealthService : IHealthService
     private readonly IWeightRepository _weightRepository;
     private readonly IHygieneRepository _hygieneRepository;
     private readonly ISymptomRepository _symptomRepository;
+    private readonly IMedicalEventRepository _medicalEventRepository;
 
     public HealthService(
         IWeightRepository weightRepository,
         IHygieneRepository hygieneRepository,
-        ISymptomRepository symptomRepository
+        ISymptomRepository symptomRepository,
+        IMedicalEventRepository medicalEventRepository
     )
     {
         _weightRepository = weightRepository;
         _hygieneRepository = hygieneRepository;
         _symptomRepository = symptomRepository;
+        _medicalEventRepository = medicalEventRepository;
     }
 
     private DateTime GetNowInUserTimeZone(string timeZoneId)
@@ -62,5 +65,19 @@ public class HealthService : IHealthService
             UserId = user.Id
         };
         await _symptomRepository.AddSymptom(entry, ct);
+    }
+
+    public async Task AddMedicalEvent(BotUser user, MedicalEvent medicalEvent, CancellationToken ct)
+    {
+        var today = DateOnly.FromDateTime(GetNowInUserTimeZone(user.TimeZoneId));
+        var entry = new MedicalEventEntry
+        {
+            UserId = user.Id,
+            Type = medicalEvent.Type,
+            Title = medicalEvent.Title,
+            Dosage = medicalEvent.Dosage,
+            Date = today, 
+        };
+        await _medicalEventRepository.AddEvent(entry, ct);
     }
 }
