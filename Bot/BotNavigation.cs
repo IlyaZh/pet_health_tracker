@@ -5,32 +5,42 @@ namespace ArchieHealthTracker.Bot.Helpers;
 public static class BotNavigation
 {
     private const int ButtonsInRow = 2;
-    private static readonly IReadOnlyDictionary<string, string> _menu = new Dictionary<string, string>
+
+    private static readonly IReadOnlyDictionary<string, string> Menu = new Dictionary<string, string>
     {
         ["⚖️ Взвесить"] = "/weight",
         ["🧼 Гигиена"] = "/hygiene",
         ["🤒 Симптомы"] = "/symptom",
-        ["📋 Отчет"] = "/report"
+        ["💊 Медицина"] = "/medical_event",
+        ["📋 Отчет"] = "/report",
     };
-    
+
+    private static readonly IReadOnlyDictionary<string, string> MenuAliases = new Dictionary<string, string>
+    {
+        ["/menu"] = "/start"
+    };
+
     public static class Mapper
     {
-        public static string? GetCommand(string label) => 
-            _menu.TryGetValue(label, out var cmd) ? cmd : null;
+        public static string? GetCommand(string label)
+        {
+            return MenuAliases.GetValueOrDefault(label) ?? Menu.GetValueOrDefault(label);
+        }
     }
+
     public static class Keyboards
     {
         public static readonly ReplyKeyboardMarkup Main = new(
-            _menu.Keys
+            Menu.Keys
                 .Select(k => new KeyboardButton(k))
-                .ChunkBy(ButtonsInRow) 
+                .Chunk(ButtonsInRow)
         )
         {
             ResizeKeyboard = true,
             InputFieldPlaceholder = "Выберите действие"
-        };  
+        };
     }
-    
+
     public static IEnumerable<IEnumerable<T>> ChunkBy<T>(this IEnumerable<T> source, int size) =>
         source.Select((x, i) => new { Index = i, Value = x })
             .GroupBy(x => x.Index / size)
