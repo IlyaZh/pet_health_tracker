@@ -17,7 +17,8 @@ public static class BotNavigation
 
     private static readonly IReadOnlyDictionary<string, string> MenuAliases = new Dictionary<string, string>
     {
-        ["/menu"] = "/start"
+        ["/menu"] = "/start",
+        ["/cancel"] = "/cancel" 
     };
 
     public static class Mapper

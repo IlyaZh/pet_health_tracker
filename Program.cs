@@ -41,4 +41,11 @@ builder.Services.Configure<BotConfiguration>(builder.Configuration.GetSection("B
 builder.Services.AddHostedService<BotService>();
 
 var host = builder.Build();
+
+using (var scope = host.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate(); 
+}
+
 await host.RunAsync();
