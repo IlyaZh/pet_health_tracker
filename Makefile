@@ -29,3 +29,10 @@ reset-all: clean-db
 	sleep 10
 	dotnet ef database update
 	docker compose up -d --build archi_health_tracker
+
+db-update-local:
+	@export $(shell grep -v '^#' .env | xargs) && \
+	dotnet ef database update --connection "Server=localhost;Port=3306;Database=$${MYSQL_DATABASE};Uid=root;Pwd=$${MYSQL_ROOT_PASSWORD};"
+	
+db-shell:
+	docker exec -it archie_mysql mysql -u root -p archie
