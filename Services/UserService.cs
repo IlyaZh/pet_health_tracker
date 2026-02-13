@@ -1,15 +1,21 @@
 using ArchieHealthTracker.Entities;
 using ArchieHealthTracker.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace ArchieHealthTracker.Services;
 
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly ILogger<UserService> _logger;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(
+        IUserRepository userRepository,
+        ILogger<UserService> logger
+    )
     {
         _userRepository = userRepository;
+        _logger = logger;
     }
 
     public async Task<(BotUser User, bool IsNew)> RegisterUserAsync(long telegramId, string firstName, string? username,
@@ -20,7 +26,8 @@ public class UserService : IUserService
         {
             return (user, false);
         }
-
+        
+        _logger.LogInformation("[UserServer] new user creation");
         user = new BotUser
         {
             Id = Guid.CreateVersion7(),

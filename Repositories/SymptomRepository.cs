@@ -8,7 +8,7 @@ public class SymptomRepository : ISymptomRepository
 {
     private readonly AppDbContext _context; 
     
-    SymptomRepository(AppDbContext context)
+    public SymptomRepository(AppDbContext context)
     {
         _context = context;
     }

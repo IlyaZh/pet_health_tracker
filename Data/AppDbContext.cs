@@ -31,8 +31,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                     v => v.Value,
                     v => Weight.FromKilograms(v))
                 .HasPrecision(5, 2)
-                .HasColumnType("decimal(5,2)")
-                .HasColumnName("weight_kg");
+                .HasColumnType("decimal(5,2)");
             entity.HasOne(e => e.User)
                 .WithMany()
                 .HasForeignKey(e => e.UserId)

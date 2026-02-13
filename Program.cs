@@ -13,8 +13,18 @@ using Microsoft.Extensions.Hosting;
 var builder = Host.CreateApplicationBuilder(args);
 
 var dbConnectionString = builder.Configuration.GetConnectionString("Database");
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 0));
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(dbConnectionString, ServerVersion.AutoDetect(dbConnectionString)));
+{
+    options.UseMySql(dbConnectionString, serverVersion, mysqlOptions =>
+    {
+        mysqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 10,
+            maxRetryDelay: TimeSpan.FromSeconds(5),
+            errorNumbersToAdd: null
+        );
+    });
+});
 
 builder.Services.Scan(scan => scan
     .FromAssemblyOf<ITelegramCommand>()
@@ -28,12 +38,13 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IWeightRepository, WeightRepository>();
 builder.Services.AddScoped<IHygieneRepository, HygieneRepository>();
 builder.Services.AddScoped<ISymptomRepository, SymptomRepository>();
+builder.Services.AddScoped<IMedicalEventRepository, MedicalEventRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IHealthService, HealthService>();
 
 builder.Services.AddMemoryCache();
-builder.Services.AddSingleton<UserSessionService>();
+builder.Services.AddSingleton<IUserSessionService, UserSessionService>();
 
 builder.Services.AddScoped<UpdateHandler>();
 
@@ -45,7 +56,8 @@ var host = builder.Build();
 using (var scope = host.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate(); 
+    db.Database.Migrate();
+    Console.WriteLine("✅ Миграции успешно применены.");
 }
 
 await host.RunAsync();

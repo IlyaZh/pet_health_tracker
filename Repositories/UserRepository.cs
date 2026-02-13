@@ -14,6 +14,7 @@ public class UserRepository : IUserRepository
     public async Task<BotUser?> GetByTelegramIdAsync(long telegramId, CancellationToken ct)
     {
         return await _context.Users.FirstOrDefaultAsync(u => u.TelegramId == telegramId, ct);
+
     }
 
     public async Task AddAsync(BotUser user, CancellationToken ct)

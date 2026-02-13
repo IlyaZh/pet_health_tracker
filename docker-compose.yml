@@ -4,6 +4,13 @@
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};
+    depends_on:
+      db:
+        condition: service_healthy
   
   db:
     image: mysql:8.0
