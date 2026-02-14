@@ -32,7 +32,7 @@ public class CommandExecutor
             var activeCommand = _commands.FirstOrDefault(c => c.CommandName == userSession.CommandName);
             if (activeCommand != null)
             {
-                await activeCommand.HandleInputAsync(bot, userSession, message, user, ct);
+                await activeCommand.HandleInputAsync(bot, userSession, message, user, text, ct);
                 return;
             }
         }

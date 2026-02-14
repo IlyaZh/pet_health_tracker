@@ -42,10 +42,11 @@ public class WeightCommand : ITelegramCommand
 
     public async Task HandleInputAsync(ITelegramBotClient botClient, UserSession session, Message message,
         BotUser user,
+        string text,
         CancellationToken ct)
     {
         var chatId = message.Chat.Id;
-        var text = message.Text?.Replace(',', '.');
+        text = text.Replace(',', '.');
         _logger.LogInformation("[WeightCommand] Message: {text}", text);
         _logger.LogInformation("[WeightCommand] User: {user}", user);
         var isParsed = double.TryParse(text, CultureInfo.InvariantCulture, out var weight);

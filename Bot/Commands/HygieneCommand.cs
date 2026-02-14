@@ -17,7 +17,7 @@ public class HygieneCommand : ITelegramCommand
 
     private readonly string _chooseVariant = "Выбери процедуру для Арчи:";
 
-    public HygieneCommand(IUserSessionService userSessionService,  IHealthService healthService)
+    public HygieneCommand(IUserSessionService userSessionService, IHealthService healthService)
     {
         _userSessionService = userSessionService;
         _healthService = healthService;
@@ -30,8 +30,8 @@ public class HygieneCommand : ITelegramCommand
             .Where(t => t != HygieneEventType.Unknown);
 
         var rows = actions
-            .Select(type => InlineKeyboardButton.WithCallbackData(type.GetDescription(), $"hygiene:{(int)type}"))
-            .Chunk(3); 
+            .Select(type => InlineKeyboardButton.WithCallbackData(type.GetDescription(), $"hygiene:{type.ToString()}"))
+            .Chunk(3);
         var keyboard = new InlineKeyboardMarkup(rows);
 
         var sentMessage = await botClient.SendMessage(
@@ -47,11 +47,14 @@ public class HygieneCommand : ITelegramCommand
         });
     }
 
-    public async Task HandleInputAsync(ITelegramBotClient botClient, UserSession session, Message message,
+    public async Task HandleInputAsync(
+        ITelegramBotClient botClient, 
+        UserSession session,
+        Message message, 
         BotUser user,
+        string text,
         CancellationToken ct)
     {
-        var text = message.Text;
         if (string.IsNullOrEmpty(text))
         {
             return;

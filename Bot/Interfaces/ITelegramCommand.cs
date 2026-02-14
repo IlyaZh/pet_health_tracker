@@ -8,8 +8,19 @@ public interface ITelegramCommand
 {
     string CommandName { get; }
 
-    Task ExecuteAsync(ITelegramBotClient botClient, Message message, BotUser user, CancellationToken ct);
+    Task ExecuteAsync(
+        ITelegramBotClient botClient,
+        Message message,
+        BotUser user,
+        CancellationToken ct
+    );
 
-    Task HandleInputAsync(ITelegramBotClient botClient, UserSession session, Message message, BotUser user,
-        CancellationToken ct);
+    Task HandleInputAsync(
+        ITelegramBotClient botClient,
+        UserSession session,
+        Message message,
+        BotUser user,
+        string text,
+        CancellationToken ct
+    );
 }

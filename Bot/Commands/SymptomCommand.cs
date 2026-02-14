@@ -47,6 +47,7 @@ public class SymptomCommand : ITelegramCommand
     }
 
     public async Task HandleInputAsync(ITelegramBotClient botClient, UserSession session, Message message, BotUser user,
+        string text,
         CancellationToken ct)
     {
         var input = message.Text;

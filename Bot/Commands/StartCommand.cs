@@ -36,6 +36,7 @@ public class StartCommand : ITelegramCommand
     }
 
     public async Task HandleInputAsync(ITelegramBotClient botClient, UserSession session, Message message, BotUser user,
+        string text,
         CancellationToken ct)
     {
         await Task.CompletedTask;
