@@ -19,9 +19,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.HasCharSet("utf8mb4")
             .UseCollation("utf8mb4_unicode_ci");
 
-        modelBuilder.Entity<BotUser>()
-            .HasIndex(u => u.TelegramId)
-            .IsUnique();
+        modelBuilder.Entity<BotUser>(entity =>
+        {
+            entity.ToTable("users");
+            entity.HasIndex(u => u.TelegramId)
+                .IsUnique();
+        });
 
         modelBuilder.Entity<WeightEntry>(entity =>
         {

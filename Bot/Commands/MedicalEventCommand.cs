@@ -2,6 +2,7 @@ using ArchieHealthTracker.Bot.Helpers;
 using ArchieHealthTracker.Bot.Interfaces;
 using ArchieHealthTracker.Entities;
 using ArchieHealthTracker.Extensions;
+using ArchieHealthTracker.Flows;
 using ArchieHealthTracker.Repositories;
 using ArchieHealthTracker.Services;
 using Microsoft.Extensions.Logging;
@@ -111,88 +112,86 @@ public class MedicalEventCommand : ITelegramCommand
 
         _logger.LogInformation($"[MedicalEventCommand] message: {text}");
 
-        if (text.StartsWith("medical_event:"))
+        if (text == _cancelButtonCallback)
         {
-            var parts = text.Split(':');
-            if (parts.Length < 2)
-            {
-                throw new ArgumentException("Invalid medical_event input, not enough arguments");
-            }
+            await botClient.EditMessageText(
+                message.Chat.Id,
+                session.MessageId,
+                "❌ Ввод медицинского события отменен.",
+                cancellationToken: ct
+            );
+            _userSessionService.ClearSession(user.Id);
 
-            var arg = parts[1];
-            if (arg == "cancel")
-            {
-                await botClient.EditMessageText(
-                    message.Chat.Id,
-                    session.MessageId,
-                    "❌ Ввод медицинского события отменен.",
-                    cancellationToken: ct
-                );
-                _userSessionService.ClearSession(user.Id);
+            await botClient.SendMessage(message.Chat.Id, "Чем еще могу помочь?",
+                replyMarkup: BotNavigation.Keyboards.Main, cancellationToken: ct);
+            return;
+        }
 
-                await botClient.SendMessage(message.Chat.Id, "Чем еще могу помочь?",
-                    replyMarkup: BotNavigation.Keyboards.Main, cancellationToken: ct);
-                return;
-            }
 
-            if (Enum.TryParse<MedicalEventType>(parts[1], out var type))
+        if (!session.Metadata.ContainsKey("step") && text.StartsWith("medical_event:"))
+        {
+            var typeStr = text.Split(':')[1];
+            if (Enum.TryParse<MedicalEventType>(typeStr, out var type))
             {
-                var typeStr = arg;
-                session.Metadata["type"] = typeStr;
-                session.Metadata["step"] = "title";
+                session.Metadata["type"] = type.ToString();
+                session.Metadata["step"] = MedicalEventStep.Title.ToString();
                 _userSessionService.SetUserState(user.Id, session);
 
                 await botClient.EditMessageText(message.Chat.Id, session.MessageId,
-                    $"Выбрано событие: *{type.GetDescription()}*\n\nНапиши наименование события (например, 'Посещение Клиники' или 'Бравекто') или нажми кнопку 'Пропустить':",
+                    $"Выбрано: *{type.GetDescription()}*\n\nВведите название:",
                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                    replyMarkup: GetCancelKeyboard(),
-                    cancellationToken: ct);
+                    replyMarkup: GetCancelKeyboard(), cancellationToken: ct);
                 return;
             }
         }
 
-        var currentStep = session.Metadata.GetValueOrDefault("step");
-        switch (currentStep)
+        var currentStepStr = session.Metadata["step"];
+        var currentStep = Enum.Parse<MedicalEventStep>(currentStepStr);
+        var eventType = Enum.Parse<MedicalEventType>(session.Metadata["type"]);
+
+        if (!text.StartsWith("skip:"))
         {
-            case "title":
-                session.Metadata["title"] = text;
-                session.Metadata["step"] = "dosage";
-                _userSessionService.SetUserState(user.Id, session);
-
-                await botClient.EditMessageText(message.Chat.Id, session.MessageId,
-                    $"Название: *{text}*\n\n💊 Введи дозировку (или нажми пропустить):",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                    replyMarkup: GetSkipAndCancelKeyboard("dosage"),
-                    cancellationToken: ct);
-                break;
-            case "dosage":
-                if (text != "skip:dosage" )
-                {
-                    session.Metadata["dosage"] = text;
-                }
-
-                session.Metadata["step"] = "note";
-                _userSessionService.SetUserState(user.Id, session);
-                var dosageMessage = session.Metadata.GetValueOrDefault("dosage", "не указано"); 
-
-                await botClient.EditMessageText(message.Chat.Id, session.MessageId,
-                    $"Дозировка: *{dosageMessage}*\n\n🗒 Добавь заметку (или пропусти):",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                    replyMarkup: GetSkipAndCancelKeyboard("note"),
-                    cancellationToken: ct);
-                break;
-            case "note":
-                if (text != "skip:note")
-                {
-                    session.Metadata["note"] = text;
-                }
-
-                _userSessionService.SetUserState(user.Id, session);
-                await Finish(botClient, message, user, session, ct);
-
-                break;
+            session.Metadata[currentStep.ToString().ToLower()] = text;
         }
+
+        var nextStep = MedicalEventFlowConfig.GetNextStep(eventType, currentStep);
+
+        if (nextStep.HasValue)
+        {
+            session.Metadata["step"] = nextStep.Value.ToString();
+            _userSessionService.SetUserState(user.Id, session);
+
+            await AskNextStep(botClient, message, session, nextStep.Value, ct);
+            return;
+        }
+
+        await Finish(botClient, message, user, session, ct);
     }
+
+    private async Task AskNextStep(
+        ITelegramBotClient bot,
+        Message msg,
+        UserSession session,
+        MedicalEventStep step,
+        CancellationToken ct
+    )
+    {
+        var prompt = step switch
+        {
+            MedicalEventStep.Dosage => "💊 Введите дозировку:",
+            MedicalEventStep.Note => "🗒 Добавьте заметку:",
+            _ => "Введите данные:"
+        };
+
+        await bot.EditMessageText(
+            msg.Chat.Id,
+            session.MessageId,
+            prompt,
+            replyMarkup: GetSkipAndCancelKeyboard(step.ToString().ToLower()),
+            cancellationToken: ct
+        );
+    }
+
 
     private InlineKeyboardMarkup GetCancelKeyboard() =>
         new(InlineKeyboardButton.WithCallbackData(_cancelButtonLabel, _cancelButtonCallback));
