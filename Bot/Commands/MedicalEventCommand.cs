@@ -58,21 +58,62 @@ public class MedicalEventCommand : ITelegramCommand
         });
     }
 
-    public async Task HandleInputAsync(ITelegramBotClient botClient, UserSession session, Message message, BotUser user,
+    private async Task Finish(
+        ITelegramBotClient botClient,
+        Message message,
+        BotUser user,
+        UserSession session,
+        CancellationToken ct
+    )
+    {
+        var isParsed = Enum.TryParse<MedicalEventType>(session.Metadata["type"].AsSpan(), out var finalType);
+        if (!isParsed)
+        {
+            throw new ArgumentException("Invalid medical_event input, not enough arguments");
+        }
+
+        session.Metadata.TryGetValue("dosage", out var dosage);
+        session.Metadata.TryGetValue("note", out var note);
+
+        await botClient.EditMessageText(message.Chat.Id, session.MessageId,
+            $"✅ *Запись сохранена!*\n" +
+            $"Тип: {finalType.GetDescription()}\n" +
+            $"Название: {session.Metadata["title"]}\n" +
+            $"Дозировка: {dosage ?? "-"}\n" +
+            $"Заметка: {note ?? "-"}",
+            parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+            cancellationToken: ct);
+        var medicalEvent = new MedicalEvent
+        {
+            Type = finalType,
+            Title = session.Metadata["title"],
+            Dosage = dosage,
+            Note = note,
+        };
+        await _healthService.AddMedicalEvent(user, medicalEvent, ct);
+
+        _userSessionService.ClearSession(user.Id);
+    }
+
+    public async Task HandleInputAsync(
+        ITelegramBotClient botClient,
+        UserSession session,
+        Message message,
+        BotUser user,
         string text,
         CancellationToken ct)
     {
-        var input = message.Text;
-        if (string.IsNullOrEmpty(input))
+        _logger.LogInformation("[MedicalEventCommand] HandleInputAsync");
+        if (string.IsNullOrEmpty(text))
         {
             throw new ArgumentException("Invalid input");
         }
 
-        _logger.LogDebug($"[MedicalEventCommand] message: {input}");
+        _logger.LogInformation($"[MedicalEventCommand] message: {text}");
 
-        if (input.StartsWith("medical_event:"))
+        if (text.StartsWith("medical_event:"))
         {
-            var parts = input.Split(':');
+            var parts = text.Split(':');
             if (parts.Length < 2)
             {
                 throw new ArgumentException("Invalid medical_event input, not enough arguments");
@@ -114,54 +155,41 @@ public class MedicalEventCommand : ITelegramCommand
         switch (currentStep)
         {
             case "title":
-                session.Metadata["title"] = input;
+                session.Metadata["title"] = text;
                 session.Metadata["step"] = "dosage";
                 _userSessionService.SetUserState(user.Id, session);
 
                 await botClient.EditMessageText(message.Chat.Id, session.MessageId,
-                    $"Название: *{input}*\n\n💊 Введи дозировку (или нажми пропустить):",
+                    $"Название: *{text}*\n\n💊 Введи дозировку (или нажми пропустить):",
                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                     replyMarkup: GetSkipAndCancelKeyboard("dosage"),
                     cancellationToken: ct);
                 break;
             case "dosage":
-                session.Metadata["dosage"] = input == "skip:dosage" ? "не указана" : input;
+                if (text != "skip:dosage" )
+                {
+                    session.Metadata["dosage"] = text;
+                }
+
                 session.Metadata["step"] = "note";
                 _userSessionService.SetUserState(user.Id, session);
+                var dosageMessage = session.Metadata.GetValueOrDefault("dosage", "не указано"); 
 
                 await botClient.EditMessageText(message.Chat.Id, session.MessageId,
-                    $"Дозировка: *{session.Metadata["dosage"]}*\n\n🗒 Добавь заметку (или пропусти):",
+                    $"Дозировка: *{dosageMessage}*\n\n🗒 Добавь заметку (или пропусти):",
                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                     replyMarkup: GetSkipAndCancelKeyboard("note"),
                     cancellationToken: ct);
                 break;
             case "note":
-                var note = input == "skip:note" ? null : input;
-                var isParsed = Enum.TryParse<MedicalEventType>(session.Metadata["type"].AsSpan(), out var finalType);
-                if (!isParsed)
+                if (text != "skip:note")
                 {
-                    throw new ArgumentException("Invalid medical_event input, not enough arguments");
+                    session.Metadata["note"] = text;
                 }
 
-                await botClient.EditMessageText(message.Chat.Id, session.MessageId,
-                    $"✅ *Запись сохранена!*\n" +
-                    $"Тип: {finalType.GetDescription()}\n" +
-                    $"Название: {session.Metadata["title"]}\n" +
-                    $"Дозировка: {session.Metadata["dosage"]}\n" +
-                    $"Заметка: {note ?? "-"}",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                    cancellationToken: ct);
+                _userSessionService.SetUserState(user.Id, session);
+                await Finish(botClient, message, user, session, ct);
 
-                var medicalEvent = new MedicalEvent
-                {
-                    Type = finalType,
-                    Title = session.Metadata["title"],
-                    Dosage = session.Metadata["dosage"],
-                    Note = session.Metadata["note"]
-                };
-                await _healthService.AddMedicalEvent(user, medicalEvent, ct);
-
-                _userSessionService.ClearSession(user.Id);
                 break;
         }
     }

@@ -25,7 +25,7 @@ public class WeightRepository : IWeightRepository
             existing.UserId = entry.UserId;
             existing.UpdatedAt = DateTime.UtcNow;
 
-            _logger.LogDebug("Обновлена запись веса за {Date}", existing.Date);
+            _logger.LogInformation("Обновлена запись веса за {Date}", existing.Date);
         }
         else
         {

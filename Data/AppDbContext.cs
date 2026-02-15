@@ -15,6 +15,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.HasCharSet("utf8mb4")
+            .UseCollation("utf8mb4_unicode_ci");
 
         modelBuilder.Entity<BotUser>()
             .HasIndex(u => u.TelegramId)

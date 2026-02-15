@@ -7,7 +7,7 @@
     env_file:
       - .env
     environment:
-      - ConnectionStrings__DefaultConnection=Server=db;Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};
+      - ConnectionStrings__DefaultConnection=Server=db;Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};CharSet=utf8mb4;
     depends_on:
       db:
         condition: service_healthy
@@ -16,6 +16,11 @@
     image: mysql:8.0
     container_name: archie_mysql
     restart: always
+    command: [
+      "mysqld",
+      "--character-set-server=utf8mb4",
+      "--collation-server=utf8mb4_unicode_ci"
+    ]
     env_file:
       - .env
     ports:
