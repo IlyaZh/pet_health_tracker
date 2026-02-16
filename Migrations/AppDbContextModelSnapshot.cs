@@ -52,7 +52,7 @@ namespace ArchieHealthTracker.Migrations
                     b.HasIndex("TelegramId")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("ArchieHealthTracker.Entities.HealthEvent", b =>
@@ -87,7 +87,7 @@ namespace ArchieHealthTracker.Migrations
 
                     b.HasIndex("BotUserId");
 
-                    b.ToTable("Events");
+                    b.ToTable("health_events", (string)null);
                 });
 
             modelBuilder.Entity("ArchieHealthTracker.Entities.HygieneEntry", b =>

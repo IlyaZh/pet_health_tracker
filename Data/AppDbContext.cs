@@ -19,6 +19,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.HasCharSet("utf8mb4")
             .UseCollation("utf8mb4_unicode_ci");
 
+        modelBuilder.Entity<HealthEvent>(entity =>
+        {
+            entity.ToTable("health_events");
+        });
+
         modelBuilder.Entity<BotUser>(entity =>
         {
             entity.ToTable("users");

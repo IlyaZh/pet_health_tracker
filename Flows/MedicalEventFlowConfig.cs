@@ -2,7 +2,14 @@ using ArchieHealthTracker.Entities;
 
 namespace ArchieHealthTracker.Flows;
 
-public enum MedicalEventStep { Title, Dosage, Note, Confirm, Cancel }
+public enum MedicalEventStep
+{
+    Title,
+    Dosage,
+    Note,
+    Confirm,
+    Cancel
+}
 
 public class MedicalEventFlowConfig
 {
@@ -18,6 +25,9 @@ public class MedicalEventFlowConfig
     {
         if (!Flows.TryGetValue(eventType, out var steps)) return null;
         var currentIndex = steps.IndexOf(currentEventStep);
-        return currentIndex == -1 ? null : steps[currentIndex + 1];
+
+        if (currentIndex == -1 || currentIndex >= steps.Count - 1) return null;
+
+        return steps[currentIndex + 1];
     }
 }

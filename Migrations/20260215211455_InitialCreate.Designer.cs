@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArchieHealthTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260215205805_v2")]
-    partial class v2
+    [Migration("20260215211455_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,7 +55,7 @@ namespace ArchieHealthTracker.Migrations
                     b.HasIndex("TelegramId")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("ArchieHealthTracker.Entities.HealthEvent", b =>
@@ -90,7 +90,7 @@ namespace ArchieHealthTracker.Migrations
 
                     b.HasIndex("BotUserId");
 
-                    b.ToTable("Events");
+                    b.ToTable("health_events", (string)null);
                 });
 
             modelBuilder.Entity("ArchieHealthTracker.Entities.HygieneEntry", b =>

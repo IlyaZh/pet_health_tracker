@@ -15,7 +15,7 @@ namespace ArchieHealthTracker.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "users",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -30,13 +30,13 @@ namespace ArchieHealthTracker.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_users", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateTable(
-                name: "Events",
+                name: "health_events",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -53,11 +53,11 @@ namespace ArchieHealthTracker.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Events", x => x.Id);
+                    table.PrimaryKey("PK_health_events", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Events_Users_BotUserId",
+                        name: "FK_health_events_users_BotUserId",
                         column: x => x.BotUserId,
-                        principalTable: "Users",
+                        principalTable: "users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -79,9 +79,9 @@ namespace ArchieHealthTracker.Migrations
                 {
                     table.PrimaryKey("PK_hygiene", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_hygiene_Users_UserId",
+                        name: "FK_hygiene_users_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -109,9 +109,9 @@ namespace ArchieHealthTracker.Migrations
                 {
                     table.PrimaryKey("PK_medical_events", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_medical_events_Users_UserId",
+                        name: "FK_medical_events_users_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -134,9 +134,9 @@ namespace ArchieHealthTracker.Migrations
                 {
                     table.PrimaryKey("PK_symptoms", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_symptoms_Users_UserId",
+                        name: "FK_symptoms_users_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -158,9 +158,9 @@ namespace ArchieHealthTracker.Migrations
                 {
                     table.PrimaryKey("PK_weight", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_weight_Users_UserId",
+                        name: "FK_weight_users_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -168,8 +168,8 @@ namespace ArchieHealthTracker.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Events_BotUserId",
-                table: "Events",
+                name: "IX_health_events_BotUserId",
+                table: "health_events",
                 column: "BotUserId");
 
             migrationBuilder.CreateIndex(
@@ -218,8 +218,8 @@ namespace ArchieHealthTracker.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_TelegramId",
-                table: "Users",
+                name: "IX_users_TelegramId",
+                table: "users",
                 column: "TelegramId",
                 unique: true);
 
@@ -239,7 +239,7 @@ namespace ArchieHealthTracker.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Events");
+                name: "health_events");
 
             migrationBuilder.DropTable(
                 name: "hygiene");
@@ -254,7 +254,7 @@ namespace ArchieHealthTracker.Migrations
                 name: "weight");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "users");
         }
     }
 }

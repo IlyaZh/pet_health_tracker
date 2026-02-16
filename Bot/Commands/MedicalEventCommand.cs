@@ -73,21 +73,23 @@ public class MedicalEventCommand : ITelegramCommand
             throw new ArgumentException("Invalid medical_event input, not enough arguments");
         }
 
-        session.Metadata.TryGetValue("dosage", out var dosage);
-        session.Metadata.TryGetValue("note", out var note);
-
+        session.Metadata.TryGetValue(MedicalEventStep.Dosage.ToString(), out var dosage);
+        session.Metadata.TryGetValue(MedicalEventStep.Note.ToString(), out var note);
+        session.Metadata.TryGetValue(MedicalEventStep.Title.ToString(), out var title);
+        
         await botClient.EditMessageText(message.Chat.Id, session.MessageId,
             $"✅ *Запись сохранена!*\n" +
             $"Тип: {finalType.GetDescription()}\n" +
-            $"Название: {session.Metadata["title"]}\n" +
+            $"Название: {title}\n" +
             $"Дозировка: {dosage ?? "-"}\n" +
             $"Заметка: {note ?? "-"}",
             parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
             cancellationToken: ct);
+        
         var medicalEvent = new MedicalEvent
         {
             Type = finalType,
-            Title = session.Metadata["title"],
+            Title = title ?? "Без названия",
             Dosage = dosage,
             Note = note,
         };
@@ -151,7 +153,7 @@ public class MedicalEventCommand : ITelegramCommand
 
         if (!text.StartsWith("skip:"))
         {
-            session.Metadata[currentStep.ToString().ToLower()] = text;
+            session.Metadata[currentStep.ToString()] = text;
         }
 
         var nextStep = MedicalEventFlowConfig.GetNextStep(eventType, currentStep);
