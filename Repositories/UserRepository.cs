@@ -7,19 +7,19 @@ namespace ArchieHealthTracker.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly AppDbContext _context;
+    private readonly AppDbContext _dbContext;
 
-    public UserRepository(AppDbContext context) => _context = context;
+    public UserRepository(AppDbContext dbContext) => _dbContext = dbContext;
 
     public async Task<BotUser?> GetByTelegramIdAsync(long telegramId, CancellationToken ct)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.TelegramId == telegramId, ct);
+        return await _dbContext.Users.FirstOrDefaultAsync(u => u.TelegramId == telegramId, ct);
 
     }
 
     public async Task AddAsync(BotUser user, CancellationToken ct)
     {
-        await _context.Users.AddAsync(user, ct);
-        await _context.SaveChangesAsync(ct);
+        await _dbContext.Users.AddAsync(user, ct);
+        await _dbContext.SaveChangesAsync(ct);
     }
 }

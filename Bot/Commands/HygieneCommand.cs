@@ -66,7 +66,7 @@ public class HygieneCommand : ITelegramCommand
             throw new ArgumentException($"Invalid hygiene input");
         }
 
-        await _healthService.AddHygiene(user, type, ct);
+        await _healthService.AddHygieneAsync(user, type, ct);
         var typeName = type.GetDescription();
 
         await botClient.EditMessageText(

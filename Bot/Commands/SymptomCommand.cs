@@ -83,7 +83,7 @@ public class SymptomCommand : ITelegramCommand
                 Type = type,
                 Note = note
             };
-            await _healthService.AddSymptom(user, symptom, ct);
+            await _healthService.AddSymptomAsync(user, symptom, ct);
             
             await botClient.EditMessageText(message.Chat.Id, session.MessageId,
                 $"✅ Записал симптом: *{type.GetDescription()}*\nДетали: _{note ?? "нет"}_",

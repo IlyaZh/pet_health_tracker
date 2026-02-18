@@ -93,7 +93,7 @@ public class MedicalEventCommand : ITelegramCommand
             Dosage = dosage,
             Note = note,
         };
-        await _healthService.AddMedicalEvent(user, medicalEvent, ct);
+        await _healthService.AddMedicalEventAsync(user, medicalEvent, ct);
 
         _userSessionService.ClearSession(user.Id);
     }

@@ -4,5 +4,11 @@ namespace ArchieHealthTracker.Repositories;
 
 public interface IMedicalEventRepository
 {
-    public Task AddEvent(MedicalEventEntry entry, CancellationToken ct);
+    public Task AddEventAsync(MedicalEventEntry entry, CancellationToken ct);
+
+    public Task<List<MedicalEventEntry>> GetFilteredAsync(
+        MedicalEventType? eventType,
+        QueryParams parameters,
+        CancellationToken ct
+    );
 }

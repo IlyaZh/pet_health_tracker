@@ -1,6 +1,8 @@
+using ArchieHealthTracker.Extensions.Interfaces;
+
 namespace ArchieHealthTracker.Entities;
 
-public class SymptomEntry
+public class SymptomEntry : IHasCreatedAt
 {
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public Guid UserId { get; set; }

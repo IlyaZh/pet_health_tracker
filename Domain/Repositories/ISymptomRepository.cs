@@ -4,5 +4,11 @@ namespace ArchieHealthTracker.Repositories;
 
 public interface ISymptomRepository
 {
-    Task AddSymptom(SymptomEntry entry, CancellationToken ct);
+    Task AddSymptomAsync(SymptomEntry entry, CancellationToken ct);
+
+    public Task<List<SymptomEntry>> GetFilteredAsync(
+        SymptomType? symptomType,
+        QueryParams parameters,
+        CancellationToken ct
+    );
 }

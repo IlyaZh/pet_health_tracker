@@ -1,6 +1,8 @@
+using ArchieHealthTracker.Extensions.Interfaces;
+
 namespace ArchieHealthTracker.Entities;
 
-public class WeightEntry
+public class WeightEntry : IHasCreatedAt
 {
     public Guid Id { get; set; } = Guid.CreateVersion7();
     

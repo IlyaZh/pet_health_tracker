@@ -1,8 +1,9 @@
+using ArchieHealthTracker.Extensions.Interfaces;
 using Telegram.Bot.Types;
 
 namespace ArchieHealthTracker.Entities;
 
-public class HygieneEntry
+public class HygieneEntry : IHasCreatedAt
 {
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public DateOnly Date { get; set; }

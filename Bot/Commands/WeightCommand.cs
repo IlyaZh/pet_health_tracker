@@ -57,7 +57,7 @@ public class WeightCommand : ITelegramCommand
             return;
         }
 
-        await _healthService.AddWeight(user, Weight.FromKilograms(weight), ct);
+        await _healthService.AddWeightAsync(user, Weight.FromKilograms(weight), ct);
         _userSessionService.ClearSession(user.Id);
         await botClient.EditMessageText(chatId, session.MessageId, $"✅ Вес {weight} кг сохранен!",
             cancellationToken: ct);

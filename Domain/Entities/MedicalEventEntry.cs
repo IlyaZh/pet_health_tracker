@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ArchieHealthTracker.Extensions.Interfaces;
 
 namespace ArchieHealthTracker.Entities;
 
-public class MedicalEventEntry
+public class MedicalEventEntry : IHasCreatedAt
 {
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public Guid UserId { get; set; }

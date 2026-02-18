@@ -4,5 +4,6 @@ namespace ArchieHealthTracker.Repositories;
 
 public interface IHygieneRepository
 {
-    Task AddEvent(HygieneEntry entry, CancellationToken ct);
+    Task AddEventAsync(HygieneEntry entry, CancellationToken ct);
+    Task<List<HygieneEntry>> GetFilteredAsync(HygieneEventType? eventType, QueryParams parameters, CancellationToken ct);
 }
