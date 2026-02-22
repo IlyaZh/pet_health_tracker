@@ -103,7 +103,7 @@ public class HealthService : IHealthService
             };
         }
 
-        if (request.Category is ReportCategory.All or ReportCategory.MedicalEvents)
+        if (request.Category is ReportCategory.All or ReportCategory.MedicalEvent)
         {
             context = context with
             {
@@ -112,7 +112,7 @@ public class HealthService : IHealthService
             };
         }
 
-        if (request.Category is ReportCategory.All or ReportCategory.Symptoms)
+        if (request.Category is ReportCategory.All or ReportCategory.Symptom)
         {
             context = context with
             {

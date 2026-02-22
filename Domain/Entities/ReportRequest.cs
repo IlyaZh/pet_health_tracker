@@ -1,11 +1,9 @@
+using Microsoft.Extensions.Configuration.UserSecrets;
+
 namespace ArchieHealthTracker.Entities;
 
-public enum ReportCategory
-{
-    All, Symptoms, MedicalEvents, Weight, Hygiene
-};
-
 public record ReportRequest(
+    long UserId,
     ReportCategory Category,
     MedicalEventType? MedicalEvent = null,
     HygieneEventType? HygieneEvent = null,

@@ -18,6 +18,19 @@ public class BotService : BackgroundService
     private readonly IConfiguration _configuration;
     private readonly IServiceScopeFactory _scopeFactory;
 
+    public BotService(
+        ITelegramBotClient botClient,
+        IConfiguration config,
+        ILogger<BotService> logger,
+        IServiceScopeFactory scopeFactory
+    )
+    {
+        _botClient = botClient;
+        _logger = logger;
+        _configuration = config;
+        _scopeFactory = scopeFactory;
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Starting bot");
@@ -37,15 +50,6 @@ public class BotService : BackgroundService
         _logger.LogInformation($"Бот {me.Username} успешно запущен и слушает сообщения.");
 
         await Task.Delay(Timeout.Infinite, stoppingToken);
-    }
-
-    public BotService(IConfiguration config, ILogger<BotService> logger, IServiceScopeFactory scopeFactory,
-        IOptions<BotConfiguration> options)
-    {
-        _botClient = new TelegramBotClient(options.Value.Token);
-        _logger = logger;
-        _configuration = config;
-        _scopeFactory = scopeFactory;
     }
 
     private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)

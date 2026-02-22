@@ -8,7 +8,7 @@ public static class BotNavigation
 
     private static readonly IReadOnlyDictionary<string, string> Menu = new Dictionary<string, string>
     {
-        ["⚖️ Взвесить"] = "/weight",
+        ["⚖️ Вес"] = "/weight",
         ["🧼 Гигиена"] = "/hygiene",
         ["🤒 Симптомы"] = "/symptom",
         ["💊 Медицина"] = "/medical_event",

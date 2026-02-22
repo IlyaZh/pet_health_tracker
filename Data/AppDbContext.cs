@@ -61,13 +61,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .WithMany()
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => new { e.Date, e.Event }).IsUnique();
         });
 
         modelBuilder.Entity<SymptomEntry>(symptom =>
         {
             symptom.ToTable("symptoms");
             symptom.HasIndex(e => e.CreatedAt);
-            symptom.HasIndex(e => e.Symptom);
+            symptom.HasIndex(e => new { e.Symptom, e.CreatedAt });
 
             symptom.Property(s => s.Symptom)
                 .HasConversion<string>();
@@ -83,7 +85,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             medicalEvent.HasIndex(e => e.Date);
             medicalEvent.Property(e => e.Type)
                 .HasConversion<string>();
-            medicalEvent.HasIndex(e => e.Type);
+            medicalEvent.HasIndex(e => new { e.Type, e.Date });
             medicalEvent.HasOne(e => e.User)
                 .WithMany()
                 .HasForeignKey(e => e.UserId)

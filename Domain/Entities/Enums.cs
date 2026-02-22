@@ -2,6 +2,27 @@ using System.ComponentModel;
 
 namespace ArchieHealthTracker.Entities;
 
+public enum ReportCategory
+{
+    [Description("Неизвестно")]
+    Unknown = 0,
+    
+    [Description("Все")]
+    All = 1,
+    
+    [Description("🧼 Гигиена")]
+    Hygiene = 2,
+    
+    [Description("💊 Медицина")]
+    MedicalEvent = 3,
+    
+    [Description("🤒 Симптомы")]
+    Symptom = 4,
+    
+    [Description("⚖ Вес")]
+    Weight = 5,
+};
+
 public enum HealthEventType
 {
     General = 0,

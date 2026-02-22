@@ -1,14 +1,19 @@
-﻿using ArchieHealthTracker.Bot;
+﻿using System.Threading.Channels;
+using ArchieHealthTracker.Bot;
 using ArchieHealthTracker.Bot.Handlers;
 using ArchieHealthTracker.Bot.Interfaces;
 using ArchieHealthTracker.Configuration;
 using ArchieHealthTracker.Data;
+using ArchieHealthTracker.Domain.Entities;
 using ArchieHealthTracker.Repositories;
 using ArchieHealthTracker.Services;
+using ArchieHealthTracker.Services.Reporting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Telegram.Bot;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -24,6 +29,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             errorNumbersToAdd: null
         );
     });
+});
+
+builder.Services.Configure<BotConfiguration>(builder.Configuration.GetSection("BotConfiguration"));
+builder.Services.AddSingleton<ITelegramBotClient>(sp => 
+{
+    var options = sp.GetRequiredService<IOptions<BotConfiguration>>().Value;
+    return new TelegramBotClient(options.Token);
 });
 
 builder.Services.Scan(scan => scan
@@ -45,6 +57,11 @@ builder.Services.AddScoped<IHealthService, HealthService>();
 
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<IUserSessionService, UserSessionService>();
+
+builder.Services.AddSingleton<IReportQueue, ReportQueue>();
+builder.Services.AddHostedService<ReportProcessor>();
+
+builder.Services.AddScoped<IReportGenerator<string>, TelegramReportGenerator>();
 
 builder.Services.AddScoped<UpdateHandler>();
 
