@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArchieHealthTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260215211455_InitialCreate")]
+    [Migration("20260223181247_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -120,6 +120,9 @@ namespace ArchieHealthTracker.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("Date", "Event")
+                        .IsUnique();
+
                     b.ToTable("hygiene", (string)null);
                 });
 
@@ -158,9 +161,9 @@ namespace ArchieHealthTracker.Migrations
 
                     b.HasIndex("Date");
 
-                    b.HasIndex("Type");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("Type", "Date");
 
                     b.ToTable("medical_events", (string)null);
                 });
@@ -188,9 +191,9 @@ namespace ArchieHealthTracker.Migrations
 
                     b.HasIndex("CreatedAt");
 
-                    b.HasIndex("Symptom");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("Symptom", "CreatedAt");
 
                     b.ToTable("symptoms", (string)null);
                 });

@@ -5,6 +5,7 @@ using ArchieHealthTracker.Bot.Interfaces;
 using ArchieHealthTracker.Configuration;
 using ArchieHealthTracker.Data;
 using ArchieHealthTracker.Domain.Entities;
+using ArchieHealthTracker.Entities;
 using ArchieHealthTracker.Repositories;
 using ArchieHealthTracker.Services;
 using ArchieHealthTracker.Services.Reporting;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using QuestPDF.Infrastructure;
 using Telegram.Bot;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -32,7 +34,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 builder.Services.Configure<BotConfiguration>(builder.Configuration.GetSection("BotConfiguration"));
-builder.Services.AddSingleton<ITelegramBotClient>(sp => 
+builder.Services.AddSingleton<ITelegramBotClient>(sp =>
 {
     var options = sp.GetRequiredService<IOptions<BotConfiguration>>().Value;
     return new TelegramBotClient(options.Token);
@@ -61,7 +63,8 @@ builder.Services.AddSingleton<IUserSessionService, UserSessionService>();
 builder.Services.AddSingleton<IReportQueue, ReportQueue>();
 builder.Services.AddHostedService<ReportProcessor>();
 
-builder.Services.AddScoped<IReportGenerator<string>, TelegramReportGenerator>();
+builder.Services.AddKeyedScoped<IReportGenerator, TelegramReportGenerator>(ReportFormat.Telegram);
+builder.Services.AddKeyedScoped<IReportGenerator, PdfReportGenerator>(ReportFormat.Pdf);
 
 builder.Services.AddScoped<UpdateHandler>();
 

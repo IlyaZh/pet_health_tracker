@@ -1,9 +1,10 @@
 using System.Text;
+using ArchieHealthTracker.Domain.Entities;
 using ArchieHealthTracker.Entities;
 
 namespace ArchieHealthTracker.Repositories;
 
-public interface IReportGenerator<TOutput>
+public interface IReportGenerator
 {
-    Task<TOutput> GenerateAsync(ReportContext context, CancellationToken ct);
+    Task<ReportResult> GenerateAsync(ReportContext context, CancellationToken ct);
 }

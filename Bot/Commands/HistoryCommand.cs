@@ -23,6 +23,7 @@ public class HistoryCommand : ITelegramCommand
 
     private readonly string _chooseVariant = "Выбери тип отчета:";
     private readonly string _cancelButtonCallback = "report_type:cancel";
+    private readonly int TelegramMaxRows = 20;
 
     private readonly Dictionary<string, int> _periods = new()
     {
@@ -75,121 +76,116 @@ public class HistoryCommand : ITelegramCommand
         _userSessionService.SetUserState(user.Id, session);
     }
 
-    public async Task HandleInputAsync(ITelegramBotClient botClient, UserSession session, Message message, BotUser user,
-        string text,
-        CancellationToken ct)
+    public async Task HandleInputAsync(ITelegramBotClient botClient, UserSession session, Message message, BotUser user, string text, CancellationToken ct)
     {
-        _logger.LogInformation("[HistoryCommand] HandleInputAsync");
-        if (string.IsNullOrEmpty(text))
-        {
-            throw new ArgumentException("Invalid input");
-        }
+        _logger.LogInformation("[HistoryCommand] HandleInput: {Text} at Step: {Step}", text, session.Metadata.GetValueOrDefault("step", "Start"));
 
         if (text == _cancelButtonCallback)
         {
-            await botClient.EditMessageText(
-                message.Chat.Id,
-                session.MessageId,
-                "❌ Ввод отменен.",
-                cancellationToken: ct
-            );
-            _userSessionService.ClearSession(user.Id);
-
-            await botClient.SendMessage(
-                message.Chat.Id,
-                "Чем еще могу помочь?",
-                replyMarkup: BotNavigation.Keyboards.Main,
-                cancellationToken: ct
-            );
+            await CancelFlowAsync(botClient, session, user, message, ct);
             return;
         }
 
-        if (!session.Metadata.ContainsKey("step") && text.StartsWith("report_type:"))
+        // 1. Обработка ВЫБОРА ТИПА (первый шаг)
+        if (text.StartsWith("report_type:"))
         {
-            var typeStr = text.Split(':')[1];
-            if (Enum.TryParse<ReportCategory>(typeStr, true, out var type))
-            {
-                session.Metadata["type"] = type.ToString();
-                session.Metadata["step"] = ReportStep.Period.ToString();
-                _userSessionService.SetUserState(user.Id, session);
-
-                await botClient.EditMessageText(message.Chat.Id, session.MessageId,
-                    $"Выбрано: *{type.GetDescription()}*\n\nВыберите период:",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                    replyMarkup: GetPeriodKeyboard(), cancellationToken: ct);
-                return;
-            }
-        }
-
-        var currentStepStr = session.Metadata["step"];
-        var currentStep = Enum.Parse<ReportStep>(currentStepStr);
-        var eventType = Enum.Parse<ReportCategory>(session.Metadata["type"]);
-
-        session.Metadata[currentStep.ToString()] = text;
-
-        var nextStep = ReportFlowConfig.GetNextStep(currentStep);
-        if (nextStep.HasValue)
-        {
-            session.Metadata["step"] = nextStep.Value.ToString();
+            var type = text.Split(':')[1];
+            session.Metadata["type"] = type;
+            session.Metadata["step"] = nameof(ReportStep.Period);
             _userSessionService.SetUserState(user.Id, session);
 
-            await botClient.EditMessageText(
-                message.Chat.Id,
-                session.MessageId,
-                "📅 За какой период вывести историю?",
-                replyMarkup: GetPeriodKeyboard(),
-                cancellationToken: ct
-            );
-
+            await botClient.EditMessageText(message.Chat.Id, session.MessageId,
+                $"📊 Тип: *{Enum.Parse<ReportCategory>(type).GetDescription()}*\n\n📅 Выберите период:",
+                parseMode: ParseMode.Markdown, replyMarkup: GetPeriodKeyboard(), cancellationToken: ct);
             return;
         }
 
-        await FinishAsync(botClient, message, user, session, ct);
-    }
-
-    private async Task FinishAsync(
-        ITelegramBotClient botClient,
-        Message message,
-        BotUser user,
-        UserSession session,
-        CancellationToken ct
-    )
-    {
-        var isParsed = Enum.TryParse<MedicalEventType>(session.Metadata["type"].AsSpan(), out var finalType);
-        if (!isParsed)
+        // 2. Обработка ПЕРИОДА
+        if (text.StartsWith("report_period:"))
         {
-            throw new ArgumentException("Invalid history_command input, not enough arguments");
+            var period = text.Split(':')[1];
+            session.Metadata["period"] = period;
+            session.Metadata["step"] = nameof(ReportStep.Format);
+            _userSessionService.SetUserState(user.Id, session);
+
+            var periodText = _periods.FirstOrDefault(x => x.Value.ToString() == period).Key;
+            await botClient.EditMessageText(message.Chat.Id, session.MessageId,
+                $"📅 Период: *{periodText}*\n\nОтправить как текст в чат или подготовить PDF?",
+                parseMode: ParseMode.Markdown, replyMarkup: GetFormatKeyboard(), cancellationToken: ct);
+            return;
         }
 
-        session.Metadata.TryGetValue(nameof(ReportStep.Type), out var stepType);
-        session.Metadata.TryGetValue(nameof(ReportStep.Period), out var periodStr);
+        // 3. Обработка ФОРМАТА (финал)
+        if (text.StartsWith("report_format:"))
+        {
+            var format = text.Split(':')[1];
+            session.Metadata["format"] = format;
+            await FinishAsync(botClient, message, user, session, ct);
+            return;
+        }
+    }
 
-        var reportCategory = Enum.Parse<ReportCategory>(stepType ?? ReportCategory.All.ToString());
-        var periodMonths = int.Parse(periodStr ?? _periods.First().Key);
+    private async Task CancelFlowAsync(
+        ITelegramBotClient botClient,
+        UserSession session,
+        BotUser user,
+        Message message,
+        CancellationToken ct
+        )
+    {
+        await botClient.EditMessageText(
+            message.Chat.Id,
+            session.MessageId,
+            "❌ Ввод отменен.",
+            cancellationToken: ct
+        );
+        _userSessionService.ClearSession(user.Id);
+
+        await botClient.SendMessage(
+            message.Chat.Id,
+            "Чем еще могу помочь?",
+            replyMarkup: BotNavigation.Keyboards.Main,
+            cancellationToken: ct
+        );
+        return;
+    }
+
+    private async Task FinishAsync(ITelegramBotClient botClient, Message message, BotUser user, UserSession session, CancellationToken ct)
+    {
+        var category = Enum.Parse<ReportCategory>(session.Metadata["type"]);
+        var periodMonths = int.Parse(session.Metadata["period"]);
+        var format = Enum.Parse<ReportFormat>(session.Metadata["format"]);
 
         var from = DateTime.UtcNow.AddMonths(-periodMonths);
+        
+        int? limit = format == ReportFormat.Telegram ? TelegramMaxRows : null;
+
         var reportRequest = new ReportRequest(
-            UserId: user.TelegramId,
-            Category: reportCategory,
-            DateFrom: from
+            TelegramId: user.TelegramId,
+            Category: category,
+            DateFrom: from,
+            Limit: limit
         );
 
         await _reportQueue.EnqueueReportAsync(new ReportQueueItem(
+            Format: format,
             Request: reportRequest,
             ChatId: message.Chat.Id
-            ));
+        ));
+
+        var confirmationText = format == ReportFormat.Pdf 
+            ? "✅ *Заявка на PDF принята.*\nГенерация файла может занять несколько секунд."
+            : "✅ *Заявка принята.*\nСейчас пришлю последние данные текстом.";
 
         await botClient.EditMessageText(
             message.Chat.Id,
             session.MessageId,
-            "✅Заявка на отчет принята.\n" +
-            "Как только он будет сформирован он будет отправлен отдельным файлом",
+            confirmationText,
             parseMode: ParseMode.Markdown,
             cancellationToken: ct
         );
-        
+
         _userSessionService.ClearSession(user.Id);
-        
     }
 
     private InlineKeyboardMarkup GetPeriodKeyboard()
@@ -200,5 +196,18 @@ public class HistoryCommand : ITelegramCommand
             .Chunk(3);
 
         return new InlineKeyboardMarkup(rows);
+    }
+    
+    private InlineKeyboardMarkup GetFormatKeyboard()
+    {
+        return new InlineKeyboardMarkup(new[]
+        {
+            new[] 
+            { 
+                InlineKeyboardButton.WithCallbackData("📱 Текст", "report_format:Telegram"), 
+                InlineKeyboardButton.WithCallbackData("📄 PDF файл", "report_format:Pdf") 
+            },
+            new[] { InlineKeyboardButton.WithCallbackData("❌ Отмена", _cancelButtonCallback) }
+        });
     }
 }

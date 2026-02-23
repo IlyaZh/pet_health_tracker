@@ -84,3 +84,19 @@ public enum MedicalEventType
     [Description("Прием лекарств 💊")] Medication = 3,
     [Description("Осмотр врача 🩺")] VetVisit = 4
 }
+
+
+public enum ReportFormat
+{
+    Telegram,
+    Pdf
+}
+
+public enum ReportStep
+{
+    Type,
+    Period,
+    Format,
+    Confirm,
+    Cancel
+};

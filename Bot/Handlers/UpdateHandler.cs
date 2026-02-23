@@ -29,15 +29,15 @@ public class UpdateHandler
 
     public async Task HandlerAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
     {
-        if (update.Message is { Text: { } messageText } message)
-        {
-            await HandleUpdateAsync(botClient, message, message.From, messageText, ct);
-        }
-        else if (update.CallbackQuery is { Data: { } callbackData } callback)
-        {
-            await HandleUpdateAsync(botClient, callback.Message!, callback.From, callbackData, ct);
-            await botClient.AnswerCallbackQuery(callback.Id, cancellationToken: ct);
-        }
+            if (update.Message is { Text: { } messageText } message)
+            {
+                await HandleUpdateAsync(botClient, message, message.From, messageText, ct);
+            }
+            else if (update.CallbackQuery is { Data: { } callbackData } callback)
+            {
+                await HandleUpdateAsync(botClient, callback.Message!, callback.From, callbackData, ct);
+                await botClient.AnswerCallbackQuery(callback.Id, cancellationToken: ct);
+            }
     }
 
     private async Task HandleUpdateAsync(ITelegramBotClient botClient, Message message,  User? from, string text,

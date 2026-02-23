@@ -12,7 +12,7 @@ public static class BotNavigation
         ["🧼 Гигиена"] = "/hygiene",
         ["🤒 Симптомы"] = "/symptom",
         ["💊 Медицина"] = "/medical_event",
-        ["📋 Отчет"] = "/report",
+        ["📋 Отчет"] = "/history",
     };
 
     private static readonly IReadOnlyDictionary<string, string> MenuAliases = new Dictionary<string, string>

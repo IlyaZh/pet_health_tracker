@@ -1,13 +1,14 @@
 using System.Text;
+using ArchieHealthTracker.Domain.Entities;
 using ArchieHealthTracker.Entities;
 using ArchieHealthTracker.Extensions;
 using ArchieHealthTracker.Repositories;
 
 namespace ArchieHealthTracker.Services.Reporting;
 
-public class TelegramReportGenerator : IReportGenerator<string>
+public class TelegramReportGenerator : IReportGenerator
 {
-    public Task<string> GenerateAsync(ReportContext context, CancellationToken ct)
+    public Task<ReportResult> GenerateAsync(ReportContext context, CancellationToken ct)
     {
         var sb = new StringBuilder();
 
@@ -17,8 +18,8 @@ public class TelegramReportGenerator : IReportGenerator<string>
             foreach (var ev in context.MedicalEventsEntries)
             {
                 sb.AppendLine($"• {ev.Date:dd.MM}: *{Escape(ev.Title)}*");
-                if (!string.IsNullOrEmpty(ev.Dosage)) 
-                    sb.AppendLine($"  └ 💊 Доза: {Escape(ev.Dosage)}"); 
+                if (!string.IsNullOrEmpty(ev.Dosage))
+                    sb.AppendLine($"  └ 💊 Доза: {Escape(ev.Dosage)}");
             }
         }
 
@@ -51,7 +52,12 @@ public class TelegramReportGenerator : IReportGenerator<string>
 
         if (sb.Length == 0)
         {
-            return Task.FromResult("🤷‍♂️ За указанный период записей не найдено.");
+            var text = "🤷‍♂️ За указанный период записей не найдено.";
+            return Task.FromResult(new ReportResult(
+                Encoding.UTF8.GetBytes(text),
+                string.Empty,
+                ReportFormat.Telegram
+            ));
         }
 
         var header = new StringBuilder();
@@ -60,15 +66,19 @@ public class TelegramReportGenerator : IReportGenerator<string>
         header.AppendLine("────────────────────");
         header.Append(sb);
 
-        return Task.FromResult(header.ToString());
+        return Task.FromResult(new ReportResult(
+            Encoding.UTF8.GetBytes(header.ToString()),
+            string.Empty,
+            ReportFormat.Telegram
+        ));
     }
-    
+
     private static string Escape(string text)
     {
         return text.Replace("_", "\\_")
             .Replace("*", "\\*")
             .Replace("[", "\\[")
             .Replace("`", "\\`")
-            .Replace("#", ""); 
+            .Replace("#", "");
     }
 }

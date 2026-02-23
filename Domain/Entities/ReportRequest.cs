@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration.UserSecrets;
 namespace ArchieHealthTracker.Entities;
 
 public record ReportRequest(
-    long UserId,
+    long TelegramId,
     ReportCategory Category,
     MedicalEventType? MedicalEvent = null,
     HygieneEventType? HygieneEvent = null,

@@ -178,6 +178,12 @@ namespace ArchieHealthTracker.Migrations
                 column: "Date");
 
             migrationBuilder.CreateIndex(
+                name: "IX_hygiene_Date_Event",
+                table: "hygiene",
+                columns: new[] { "Date", "Event" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_hygiene_Event",
                 table: "hygiene",
                 column: "Event");
@@ -193,9 +199,9 @@ namespace ArchieHealthTracker.Migrations
                 column: "Date");
 
             migrationBuilder.CreateIndex(
-                name: "IX_medical_events_Type",
+                name: "IX_medical_events_Type_Date",
                 table: "medical_events",
-                column: "Type");
+                columns: new[] { "Type", "Date" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_medical_events_UserId",
@@ -208,9 +214,9 @@ namespace ArchieHealthTracker.Migrations
                 column: "CreatedAt");
 
             migrationBuilder.CreateIndex(
-                name: "IX_symptoms_Symptom",
+                name: "IX_symptoms_Symptom_CreatedAt",
                 table: "symptoms",
-                column: "Symptom");
+                columns: new[] { "Symptom", "CreatedAt" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_symptoms_UserId",
