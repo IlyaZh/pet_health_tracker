@@ -22,7 +22,7 @@ public class SymptomCommand : ITelegramCommand
     public SymptomCommand(
         IUserSessionService userSessionService,
         IHealthService healthService,
-        ILogger<SymptomCommand> logger,
+        ILogger<SymptomCommand> logger
         )
     {
         _userSessionService = userSessionService;

@@ -31,7 +31,7 @@ public class PdfReportGenerator : IReportGenerator
     {
         QuestPDF.Settings.License = LicenseType.Community;
 
-        var fontPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "fonts");
+        var fontPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Fonts");
         FontManager.RegisterFont(File.OpenRead(Path.Combine(fontPath, "OpenSans-Regular.ttf")));
         FontManager.RegisterFont(File.OpenRead(Path.Combine(fontPath, "OpenSans-Bold.ttf")));
     }
