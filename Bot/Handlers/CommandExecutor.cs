@@ -24,32 +24,49 @@ public class CommandExecutor
 
     public async Task ExecuteCommand(string text, ITelegramBotClient bot, Message message, BotUser user, CancellationToken ct)
     {
+        _logger.LogInformation("[CommandExecutor] Executing command: {text}", text);
+        
+        if (!string.IsNullOrEmpty(text) && text.StartsWith("/"))
+        {
+            _logger.LogInformation("[CommandExecutor] Global command detected. Clearing session for user {UserId}", user.Id);
+            _userSessionService.ClearSession(user.Id); 
+            
+            await FindAndExecuteNewCommand(text, bot, message, user, ct);
+            return;
+        }
+        
         var userSession = _userSessionService.GetCurrentState(user.Id);
-        _logger.LogInformation("Executing command :{text}", text);
         if (userSession != null)
         {
             var activeCommand = _commands.FirstOrDefault(c => c.CommandName == userSession.CommandName);
             if (activeCommand != null)
             {
-                _logger.LogInformation("[CommandExecutor] have active command");
+                _logger.LogInformation("[CommandExecutor] Routing to active command: {Command}", activeCommand.CommandName);
                 await activeCommand.HandleInputAsync(bot, userSession, message, user, text, ct);
                 return;
             }
+            
+            _userSessionService.ClearSession(user.Id);
         }
         
+        await FindAndExecuteNewCommand(text, bot, message, user, ct);
+    }
+    
+    private async Task FindAndExecuteNewCommand(string text, ITelegramBotClient bot, Message message, BotUser user, CancellationToken ct)
+    {
         var commandName = BotNavigation.Mapper.GetCommand(text) ?? text;
-        var commandKey = commandName.Split(':')[0]; 
+        var commandKey = commandName.Split(':')[0];
 
-        var command = _commands.FirstOrDefault(c => 
+        var command = _commands.FirstOrDefault(c =>
             commandKey.Equals(c.CommandName, StringComparison.OrdinalIgnoreCase) ||
             text.StartsWith(c.CommandName, StringComparison.OrdinalIgnoreCase));
 
         if (command == null)
         {
-            _logger.LogWarning("Command {CommandName} not found", commandKey);
+            _logger.LogWarning("[CommandExecutor] Command {CommandName} not found", commandKey);
             return;
         }
-        
+
         await command.ExecuteAsync(bot, message, user, ct);
     }
 }

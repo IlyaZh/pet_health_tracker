@@ -3,6 +3,7 @@ using ArchieHealthTracker.Entities;
 using ArchieHealthTracker.Extensions;
 using ArchieHealthTracker.Repositories;
 using ArchieHealthTracker.Services;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -14,15 +15,19 @@ public class SymptomCommand : ITelegramCommand
     public string CommandName { get; } = "/symptom";
     private readonly IUserSessionService _userSessionService;
     private readonly IHealthService _healthService;
+    private readonly ILogger<SymptomCommand> _logger;
 
     private readonly string _whatHappened = "Что случилось с Арчи?";
 
     public SymptomCommand(
         IUserSessionService userSessionService,
-        IHealthService healthService)
+        IHealthService healthService,
+        ILogger<SymptomCommand> logger,
+        )
     {
         _userSessionService = userSessionService;
         _healthService = healthService;
+        _logger = logger;
     }
 
     public async Task ExecuteAsync(ITelegramBotClient botClient, Message message, BotUser user,
@@ -30,7 +35,8 @@ public class SymptomCommand : ITelegramCommand
     {
         var buttons = Enum.GetValues<SymptomType>()
             .Where(t => t != SymptomType.Unknown)
-            .Select(t => InlineKeyboardButton.WithCallbackData(t.GetDescription(), $"symptom:{(int)t}"));
+            .Select(t => InlineKeyboardButton.WithCallbackData(t.GetDescription(), $"symptom:{(int)t}"))
+            .Chunk(3);
 
         var sentMessage = await botClient.SendMessage(
             message.Chat.Id,
@@ -51,7 +57,8 @@ public class SymptomCommand : ITelegramCommand
         CancellationToken ct)
     {
         var input = message.Text;
-
+        _logger.LogInformation($"[SymptomCommand] Text: {text}");
+            
         if (!string.IsNullOrEmpty(input) && input.StartsWith("symptom:"))
         {
             var parts = input.Split(':');
@@ -61,6 +68,7 @@ public class SymptomCommand : ITelegramCommand
             }
 
             var typeId = parts[1];
+            _logger.LogInformation($"[SymptomCommand] Type: {typeId}");
 
             session.Metadata["type"] = typeId;
             session.Metadata["step"] = "awaiting_details";

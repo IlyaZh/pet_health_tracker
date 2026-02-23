@@ -1,4 +1,5 @@
 using ArchieHealthTracker.Configuration;
+using ArchieHealthTracker.Entities;
 using ArchieHealthTracker.Repositories;
 using ArchieHealthTracker.Services;
 using Microsoft.Extensions.Logging;
@@ -14,17 +15,21 @@ public class UpdateHandler
     private readonly CommandExecutor _commandExecutor;
     private readonly ILogger<UpdateHandler> _logger;
     private readonly HashSet<long> _allowedUsers;
+    private readonly IUserSessionService _userSessionService;
 
     public UpdateHandler(
         IUserService userService,
         CommandExecutor commandExecutor,
         ILogger<UpdateHandler> logger,
-        IOptions<BotConfiguration> botConfiguration)
+        IOptions<BotConfiguration> botConfiguration,
+        IUserSessionService userSessionService
+        )
     {
         _userService = userService;
         _commandExecutor = commandExecutor;
         _logger = logger;
         _allowedUsers = botConfiguration.Value.AllowedUsers;
+        _userSessionService = userSessionService;
     }
 
     public async Task HandlerAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
@@ -56,9 +61,11 @@ public class UpdateHandler
             return;
         }
 
+        BotUser? requestedUser = null;
         try
         {
             var (user, isNew) = await _userService.RegisterUserAsync(from.Id, from.FirstName, from.Username, ct);
+            requestedUser = user;
 
             _logger.LogInformation("Обработка сообщения от {UserId} ({Username}): {Text}", user.TelegramId, from.Username, text);
 
@@ -66,6 +73,11 @@ public class UpdateHandler
         }
         catch (ArgumentException ex)
         {
+            if (requestedUser != null)
+            {
+                _userSessionService.ClearSession(requestedUser.Id);
+            }
+
             _logger.LogError(ex, "Error handling update, argument exception");
             await botClient.SendMessage(message.Chat.Id, $"❌ {ex.Message}", cancellationToken: ct);
         }
