@@ -6,6 +6,7 @@ using ArchieHealthTracker.Services;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ArchieHealthTracker.Bot.Commands;
@@ -23,7 +24,7 @@ public class SymptomCommand : ITelegramCommand
         IUserSessionService userSessionService,
         IHealthService healthService,
         ILogger<SymptomCommand> logger
-        )
+    )
     {
         _userSessionService = userSessionService;
         _healthService = healthService;
@@ -34,8 +35,8 @@ public class SymptomCommand : ITelegramCommand
         CancellationToken ct)
     {
         var buttons = Enum.GetValues<SymptomType>()
-            .Where(t => t != SymptomType.Unknown)
-            .Select(t => InlineKeyboardButton.WithCallbackData(t.GetDescription(), $"symptom:{(int)t}"))
+            .Where(type => type != SymptomType.Unknown)
+            .Select(type => InlineKeyboardButton.WithCallbackData(type.GetDescription(), $"symptom:{type.ToString()}"))
             .Chunk(3);
 
         var sentMessage = await botClient.SendMessage(
@@ -52,50 +53,66 @@ public class SymptomCommand : ITelegramCommand
         });
     }
 
-    public async Task HandleInputAsync(ITelegramBotClient botClient, UserSession session, Message message, BotUser user,
+    public async Task HandleInputAsync(
+        ITelegramBotClient botClient,
+        UserSession session,
+        Message message,
+        BotUser user,
         string text,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
-        var input = message.Text;
-        _logger.LogInformation($"[SymptomCommand] Text: {text}");
-            
-        if (!string.IsNullOrEmpty(input) && input.StartsWith("symptom:"))
+        _logger.LogInformation($"[SymptomCommand] Received text/callback: {text}");
+
+        if (!string.IsNullOrEmpty(text) && text.StartsWith("symptom:"))
         {
-            var parts = input.Split(':');
-            if (parts.Length < 2 || !Enum.TryParse<SymptomType>(parts[1], out var type))
+            var parts = text.Split(':');
+
+            if (parts[1] == "skip")
             {
-                throw new ArgumentException("Invalid symptom input");
+                await FinalizeSymptomAsync(botClient, session, message, user, null, ct);
+                return;
             }
 
-            var typeId = parts[1];
-            _logger.LogInformation($"[SymptomCommand] Type: {typeId}");
+            if (Enum.TryParse<SymptomType>(parts[1], out var type))
+            {
+                session.Metadata["type"] = parts[1]; // Сохраняем имя (Limping)
+                session.Metadata["step"] = "awaiting_details";
+                _userSessionService.SetUserState(user.Id, session);
 
-            session.Metadata["type"] = typeId;
-            session.Metadata["step"] = "awaiting_details";
-            _userSessionService.SetUserState(user.Id, session);
-            
-            await botClient.EditMessageText(message.Chat.Id, session.MessageId,
-                $"Выбран симптом: *{type.GetDescription()}*\n\nНапиши подробности (например, 'после прогулки') или нажми кнопку 'Пропустить':",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("⏩ Пропустить", "symptom:skip")),
-                cancellationToken: ct);
-            return;
+                await botClient.EditMessageText(message.Chat.Id, session.MessageId,
+                    $"Выбран симптом: *{type.GetDescription()}*\n\nНапиши подробности (например, 'после прогулки') или нажми кнопку 'Пропустить':",
+                    parseMode: ParseMode.Markdown,
+                    replyMarkup: new InlineKeyboardMarkup(
+                        InlineKeyboardButton.WithCallbackData("⏩ Пропустить", "symptom:skip")),
+                    cancellationToken: ct);
+                return;
+            }
         }
 
-        if (session.Metadata.TryGetValue("type", out var storedTypeId))
+        if (session.Metadata.TryGetValue("type", out var storedTypeName))
         {
-            var type = (SymptomType)int.Parse(storedTypeId);
-            var note = (input == "symptom:skip") ? null : input;
+            await FinalizeSymptomAsync(botClient, session, message, user, text, ct);
+        }
+    }
+
+    private async Task FinalizeSymptomAsync(ITelegramBotClient botClient, UserSession session, Message message,
+        BotUser user, string? note, CancellationToken ct)
+    {
+        var typeName = session.Metadata["type"];
+        if (Enum.TryParse<SymptomType>(typeName, out var type))
+        {
             var symptom = new Symptom
             {
                 Type = type,
                 Note = note
             };
+
             await _healthService.AddSymptomAsync(user, symptom, ct);
-            
+
             await botClient.EditMessageText(message.Chat.Id, session.MessageId,
                 $"✅ Записал симптом: *{type.GetDescription()}*\nДетали: _{note ?? "нет"}_",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                parseMode: ParseMode.Markdown,
                 cancellationToken: ct);
 
             _userSessionService.ClearSession(user.Id);
