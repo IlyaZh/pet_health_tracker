@@ -76,7 +76,7 @@ public class HealthService : IHealthService
             Type = medicalEvent.Type,
             Title = medicalEvent.Title,
             Dosage = medicalEvent.Dosage,
-            Note =  medicalEvent.Note,
+            Note = medicalEvent.Note,
             Date = today,
         };
         await _medicalEventRepository.AddEventAsync(entry, ct);
@@ -85,41 +85,39 @@ public class HealthService : IHealthService
     public async Task<ReportContext> PrepareReportContextAsync(ReportRequest request, CancellationToken ct)
     {
         var baseParams = new QueryParams(request.Limit ?? DefaultRequestLimit, request.DateFrom, request.DateTo);
-        var context = new ReportContext();
 
-        if (request.Category is ReportCategory.All or ReportCategory.Hygiene)
-        {
-            context = context with
-            {
-                HygieneEntries = await _hygieneRepository.GetFilteredAsync(request.HygieneEvent, baseParams, ct)
-            };
-        }
-
-
-        if (request.Category is ReportCategory.All or ReportCategory.Weight)
-        {
-            context = context with
-            {
-                WeightEntries = await _weightRepository.GetFilteredAsync(baseParams, ct)
-            };
-        }
+        List<MedicalEventEntry>? medicalEventEntries = null;
+        List<WeightEntry>? weightEntries = null;
+        List<SymptomEntry>? symptomEntries = null;
+        List<HygieneEntry>? hygieneEntries = null;
 
         if (request.Category is ReportCategory.All or ReportCategory.MedicalEvent)
         {
-            context = context with
-            {
-                MedicalEventsEntries =
-                await _medicalEventRepository.GetFilteredAsync(request.MedicalEvent, baseParams, ct)
-            };
+            medicalEventEntries = await _medicalEventRepository.GetFilteredAsync(request.MedicalEvent, baseParams, ct);
+        }
+
+        if (request.Category is ReportCategory.All or ReportCategory.Weight)
+        {
+            weightEntries = await _weightRepository.GetFilteredAsync(baseParams, ct);
         }
 
         if (request.Category is ReportCategory.All or ReportCategory.Symptom)
         {
-            context = context with
-            {
-                SymptomEntries = await _symptomRepository.GetFilteredAsync(request.SymptomType, baseParams, ct)
-            };
+            symptomEntries = await _symptomRepository.GetFilteredAsync(request.SymptomType, baseParams, ct);
         }
+
+        if (request.Category is ReportCategory.All or ReportCategory.Hygiene)
+        {
+            hygieneEntries = await _hygieneRepository.GetFilteredAsync(request.HygieneEvent, baseParams, ct);
+        }
+
+        var context = new ReportContext() with
+        {
+            MedicalEventsEntries = medicalEventEntries,
+            WeightEntries = weightEntries,
+            SymptomEntries = symptomEntries,
+            HygieneEntries = hygieneEntries,
+        };
 
         return context;
     }
