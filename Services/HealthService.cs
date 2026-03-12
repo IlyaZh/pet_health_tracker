@@ -113,6 +113,8 @@ public class HealthService : IHealthService
 
         var context = new ReportContext() with
         {
+            From = request.DateFrom,
+            To = request.DateTo ?? DateTime.UtcNow,
             MedicalEventsEntries = medicalEventEntries,
             WeightEntries = weightEntries,
             SymptomEntries = symptomEntries,

@@ -62,7 +62,11 @@ public class TelegramReportGenerator : IReportGenerator
 
         var header = new StringBuilder();
         header.AppendLine("📋 *Отчет по здоровью Арчи*");
-        // Можно добавить: header.AppendLine($"🗓 Период: {context.From:dd.MM} — {context.To:dd.MM}");
+        if (context.From.HasValue)
+        {
+            header.AppendLine($"🗓 Период: {context.From:dd.MM} — {context.To:dd.MM}");
+        }
+
         header.AppendLine("────────────────────");
         header.Append(sb);
 

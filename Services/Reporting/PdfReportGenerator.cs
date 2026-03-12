@@ -54,6 +54,11 @@ public class PdfReportGenerator : IReportGenerator
                     {
                         col.Item().Text("Медицинская карта Арчи").FontSize(20).SemiBold().FontColor(Colors.Blue.Medium);
                         col.Item().Text($"Дата отчета: {DateTime.Now:dd.MM.yyyy}");
+                        if (context.From.HasValue)
+                        {
+                            col.Item().Text($"🗓 Период: {context.From:dd.MM} — {context.To:dd.MM}");
+                        }
+
                     });
 
                     var logoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Images",
