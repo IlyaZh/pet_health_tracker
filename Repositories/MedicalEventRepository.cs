@@ -2,16 +2,22 @@ using ArchieHealthTracker.Data;
 using ArchieHealthTracker.Entities;
 using ArchieHealthTracker.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace ArchieHealthTracker.Repositories;
 
 public class MedicalEventRepository : IMedicalEventRepository
 {
     private readonly AppDbContext _dbContext;
+    private readonly ILogger<MedicalEventRepository> _logger;
 
-    public MedicalEventRepository(AppDbContext dbContext)
+    public MedicalEventRepository(
+        AppDbContext dbContext,
+        ILogger<MedicalEventRepository> logger
+        )
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task AddEventAsync(MedicalEventEntry entry, CancellationToken ct)

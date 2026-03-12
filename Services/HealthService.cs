@@ -41,7 +41,7 @@ public class HealthService : IHealthService
             Date = today,
             UserId = user.Id
         };
-        await _weightRepository.UpsertWeight(entry, ct);
+        await _weightRepository.AddOrUpdateWeight(entry, ct);
     }
 
     public async Task AddHygieneAsync(BotUser user, HygieneEventType action, CancellationToken ct)

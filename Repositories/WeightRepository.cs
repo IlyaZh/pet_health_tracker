@@ -17,7 +17,7 @@ public class WeightRepository : IWeightRepository
         _logger = logger;
     }
 
-    public async Task UpsertWeight(WeightEntry entry, CancellationToken ct)
+    public async Task AddOrUpdateWeight(WeightEntry entry, CancellationToken ct)
     {
         var existing = await _dbContext.Weights.FirstOrDefaultAsync(e => e.Date == entry.Date, ct);
         if (existing != null)
