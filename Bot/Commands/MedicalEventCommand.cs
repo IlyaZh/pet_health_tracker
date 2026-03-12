@@ -155,6 +155,11 @@ public class MedicalEventCommand : ITelegramCommand
         {
             session.Metadata[currentStep.ToString()] = text;
         }
+        else
+        {
+            session.Metadata[currentStep.ToString()] = "";
+        }
+        _userSessionService.SetUserState(user.Id, session);
 
         var nextStep = MedicalEventFlowConfig.GetNextStep(eventType, currentStep);
 

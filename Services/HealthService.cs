@@ -76,6 +76,7 @@ public class HealthService : IHealthService
             Type = medicalEvent.Type,
             Title = medicalEvent.Title,
             Dosage = medicalEvent.Dosage,
+            Note =  medicalEvent.Note,
             Date = today,
         };
         await _medicalEventRepository.AddEventAsync(entry, ct);
