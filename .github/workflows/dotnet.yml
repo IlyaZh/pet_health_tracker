@@ -23,14 +23,14 @@ jobs:
 
     - name: Restore dependencies
       # Указываем решение явно, чтобы восстановить пакеты для всех проектов сразу
-      run: dotnet restore ArchieHealthTracker.sln
+      run: dotnet restore "Archie Health Tracker.sln"
 
     - name: Build
       # Собираем все проекты, входящие в решение
-      run: dotnet build ArchieHealthTracker.sln --no-restore --configuration Release
+      run: dotnet build "Archie Health Tracker.sln" --no-restore --configuration Release
 
     - name: Test
       # Запускаем все тесты в решении
-      run: dotnet test ArchieHealthTracker.sln --no-build --verbosity normal
+      run: dotnet test "Archie Health Tracker.sln" --no-build --verbosity normal
 
 
