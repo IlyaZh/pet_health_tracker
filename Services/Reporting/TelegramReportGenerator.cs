@@ -15,7 +15,9 @@ public class TelegramReportGenerator : IReportGenerator
 
         AppendSection(reportBody, "💊 *Медицина*", context.MedicalEventsEntries,
             ev =>
-                $"• {ev.Date.ToString(DateFormat)}: *{Escape(ev.Title)}*{(string.IsNullOrEmpty(ev.Dosage) ? "" : $"\n  └ 💊 {Escape(ev.Dosage)}")}");
+                $"• {ev.Date.ToString(DateFormat)}: *{Escape(ev.Title)}*" +
+                $"{(string.IsNullOrEmpty(ev.Dosage) ? "" : $"\n  └ 💊 {Escape(ev.Dosage)}")}" +
+                $"{(string.IsNullOrEmpty(ev.Note) ? "" : $"\n  └ 🗒 {Escape(ev.Note)}")}");
 
         AppendSection(reportBody, "⚖️ *Вес*", context.WeightEntries,
             w => $"• {w.Date.ToString(DateFormat)}: *{w.Weight.Value} кг*");

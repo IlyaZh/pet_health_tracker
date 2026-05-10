@@ -103,11 +103,13 @@ public class PdfReportGenerator : IReportGenerator
                             {
                                 m.Date.ToString("dd.MM.yy"),
                                 m.Title,
-                                $"Доз: {m.Dosage ?? "-"}\nЗаметка: {m.Note ?? "-"}"
+                                $"Доз: {m.Dosage ?? "-"}",
+                                $"Заметка: {m.Note ?? "-"}"
                             }).ToList();
 
-                        DrawTable(column.Item(), "💊 Медицинские события", ["Дата", "Событие", "Детали"], rows,
-                            [false, false, true]);
+                        DrawTable(column.Item(), "💊 Медицинские события",
+                            ["Дата", "Событие", "Дозировка", "Комментарий"], rows,
+                            [false, false, false, true]);
                     }
 
                     // --- СИМПТОМЫ ---
