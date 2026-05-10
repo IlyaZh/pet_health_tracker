@@ -1,5 +1,5 @@
 using System.Text;
-using ArchieHealthTracker.Domain.Entities; 
+using ArchieHealthTracker.Domain.Entities;
 using ArchieHealthTracker.Extensions;
 using ArchieHealthTracker.Domain.Repositories;
 
@@ -7,73 +7,64 @@ namespace ArchieHealthTracker.Services.Reporting;
 
 public class TelegramReportGenerator : IReportGenerator
 {
+    private const string DateFormat = "dd.MM.yy";
+
     public Task<ReportResult> GenerateAsync(ReportContext context, CancellationToken ct)
     {
-        var sb = new StringBuilder();
+        var reportBody = new StringBuilder();
 
-        if (context.MedicalEventsEntries is { Count: > 0 })
-        {
-            sb.AppendLine("\n💊 *Медицина*");
-            foreach (var ev in context.MedicalEventsEntries)
-            {
-                sb.AppendLine($"• {ev.Date:dd.MM}: *{Escape(ev.Title)}*");
-                if (!string.IsNullOrEmpty(ev.Dosage))
-                    sb.AppendLine($"  └ 💊 Доза: {Escape(ev.Dosage)}");
-            }
-        }
+        AppendSection(reportBody, "💊 *Медицина*", context.MedicalEventsEntries,
+            ev =>
+                $"• {ev.Date.ToString(DateFormat)}: *{Escape(ev.Title)}*{(string.IsNullOrEmpty(ev.Dosage) ? "" : $"\n  └ 💊 {Escape(ev.Dosage)}")}");
 
-        if (context.WeightEntries is { Count: > 0 })
-        {
-            sb.AppendLine("\n⚖️ *Вес*");
-            foreach (var w in context.WeightEntries)
-            {
-                sb.AppendLine($"• {w.Date:dd.MM}: *{w.Weight.Value} кг*");
-            }
-        }
+        AppendSection(reportBody, "⚖️ *Вес*", context.WeightEntries,
+            w => $"• {w.Date.ToString(DateFormat)}: *{w.Weight.Value} кг*");
 
-        if (context.HygieneEntries is { Count: > 0 })
-        {
-            sb.AppendLine("\n🧼 *Гигиена*");
-            foreach (var h in context.HygieneEntries)
-            {
-                sb.AppendLine($"• {h.Date:dd.MM}: *{h.Event.GetDescription()}*");
-            }
-        }
+        AppendSection(reportBody, "🧼 *Гигиена*", context.HygieneEntries,
+            h => $"• {h.Date.ToString(DateFormat)}: *{h.Event.GetDescription()}*");
 
-        if (context.SymptomEntries is { Count: > 0 })
-        {
-            sb.AppendLine("\n🤒 *Симптомы*");
-            foreach (var s in context.SymptomEntries)
-            {
-                sb.AppendLine($"• {s.CreatedAt:dd.MM}: *{s.Symptom.GetDescription()}*");
-            }
-        }
+        AppendSection(reportBody, "🤒 *Симптомы*", context.SymptomEntries,
+            s =>
+                $"• {s.CreatedAt.ToString(DateFormat)}: *{s.Symptom.GetDescription()}*{(string.IsNullOrEmpty(s.Note) ? "" : $"\n  └ 🗒 {Escape(s.Note)}")}");
 
-        if (sb.Length == 0)
+        // Handling the empty report
+        if (reportBody.Length == 0)
         {
-            var text = "🤷‍♂️ За указанный период записей не найдено.";
             return Task.FromResult(new ReportResult(
-                Encoding.UTF8.GetBytes(text),
+                Encoding.UTF8.GetBytes("🤷‍♂️ За указанный период записей не найдено."),
                 string.Empty,
                 ReportFormat.Telegram
             ));
         }
 
+        // Compose the final message
+
         var header = new StringBuilder();
         header.AppendLine("📋 *Отчет по здоровью Арчи*");
         if (context.From.HasValue)
         {
-            header.AppendLine($"🗓 Период: {context.From:dd.MM} — {context.To:dd.MM}");
+            header.AppendLine($"🗓 Период: {context.From:dd.MM.yy} — {context.To:dd.MM.yy}");
         }
 
         header.AppendLine("────────────────────");
-        header.Append(sb);
+        header.Append(reportBody);
 
         return Task.FromResult(new ReportResult(
             Encoding.UTF8.GetBytes(header.ToString()),
             string.Empty,
             ReportFormat.Telegram
         ));
+    }
+
+    private void AppendSection<T>(StringBuilder sb, string title, IEnumerable<T>? items, Func<T, string> formatter)
+    {
+        if (items == null || !items.Any()) return;
+
+        sb.AppendLine($"\n{title}");
+        foreach (var item in items)
+        {
+            sb.AppendLine(formatter(item));
+        }
     }
 
     private static string Escape(string text)
