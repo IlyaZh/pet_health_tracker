@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration.UserSecrets;
 
-namespace ArchieHealthTracker.Entities;
+namespace ArchieHealthTracker.Domain.Entities;
 
 public record ReportRequest(
     long TelegramId,

@@ -5,7 +5,7 @@ using ArchieHealthTracker.Bot.Interfaces;
 using ArchieHealthTracker.Configuration;
 using ArchieHealthTracker.Data;
 using ArchieHealthTracker.Domain.Entities;
-using ArchieHealthTracker.Entities;
+using ArchieHealthTracker.Domain.Repositories;
 using ArchieHealthTracker.Repositories;
 using ArchieHealthTracker.Services;
 using ArchieHealthTracker.Services.Reporting;
@@ -14,7 +14,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using QuestPDF.Infrastructure;
 using Telegram.Bot;
 
 var builder = Host.CreateApplicationBuilder(args);

@@ -1,6 +1,6 @@
 using ArchieHealthTracker.Extensions.Interfaces;
 
-namespace ArchieHealthTracker.Entities;
+namespace ArchieHealthTracker.Domain.Entities;
 
 public class WeightEntry : IHasCreatedAt
 {

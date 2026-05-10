@@ -1,11 +1,11 @@
-namespace ArchieHealthTracker.Entities;
+namespace ArchieHealthTracker.Domain.Entities;
 
 public record ReportContext
 {
-    public DateTime? From { get; set; }
-    public DateTime To { get; set; } = DateTime.UtcNow;
-    public List<MedicalEventEntry>? MedicalEventsEntries { get; set; } = new();
-    public List<WeightEntry>? WeightEntries { get; set; } = new();
-    public List<SymptomEntry>? SymptomEntries { get; set; } = new();
-    public List<HygieneEntry>? HygieneEntries { get; set; } = new();
+    public DateTime? From { get; init; }
+    public DateTime To { get; init; } = DateTime.UtcNow;
+    public List<MedicalEventEntry>? MedicalEventsEntries { get; init; } = new();
+    public List<WeightEntry>? WeightEntries { get; init; } = new();
+    public List<SymptomEntry>? SymptomEntries { get; init; } = new();
+    public List<HygieneEntry>? HygieneEntries { get; init; } = new();
 }

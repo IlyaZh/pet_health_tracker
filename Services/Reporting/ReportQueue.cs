@@ -1,6 +1,6 @@
 using System.Threading.Channels;
 using ArchieHealthTracker.Domain.Entities;
-using ArchieHealthTracker.Repositories;
+using ArchieHealthTracker.Domain.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace ArchieHealthTracker.Services;

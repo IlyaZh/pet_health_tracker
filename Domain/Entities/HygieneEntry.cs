@@ -1,7 +1,7 @@
 using ArchieHealthTracker.Extensions.Interfaces;
 using Telegram.Bot.Types;
 
-namespace ArchieHealthTracker.Entities;
+namespace ArchieHealthTracker.Domain.Entities;
 
 public class HygieneEntry : IHasCreatedAt
 {

@@ -1,4 +1,4 @@
-using ArchieHealthTracker.Entities;
+using ArchieHealthTracker.Domain.Entities;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace ArchieHealthTracker.Services;

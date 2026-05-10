@@ -1,4 +1,4 @@
-using ArchieHealthTracker.Entities;
+using ArchieHealthTracker.Domain.Entities;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 

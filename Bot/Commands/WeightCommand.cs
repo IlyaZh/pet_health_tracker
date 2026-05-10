@@ -1,7 +1,7 @@
 using System.Globalization;
 using ArchieHealthTracker.Bot.Interfaces;
-using ArchieHealthTracker.Entities;
-using ArchieHealthTracker.Repositories;
+using ArchieHealthTracker.Domain.Entities;
+using ArchieHealthTracker.Domain.Repositories;
 using ArchieHealthTracker.Services;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;

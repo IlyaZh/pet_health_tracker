@@ -1,10 +1,8 @@
 using ArchieHealthTracker.Bot.Helpers;
 using ArchieHealthTracker.Bot.Interfaces;
 using ArchieHealthTracker.Domain.Entities;
-using ArchieHealthTracker.Entities;
 using ArchieHealthTracker.Extensions;
-using ArchieHealthTracker.Flows;
-using ArchieHealthTracker.Repositories;
+using ArchieHealthTracker.Domain.Repositories;
 using ArchieHealthTracker.Services;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
@@ -76,9 +74,11 @@ public class HistoryCommand : ITelegramCommand
         _userSessionService.SetUserState(user.Id, session);
     }
 
-    public async Task HandleInputAsync(ITelegramBotClient botClient, UserSession session, Message message, BotUser user, string text, CancellationToken ct)
+    public async Task HandleInputAsync(ITelegramBotClient botClient, UserSession session, Message message, BotUser user,
+        string text, CancellationToken ct)
     {
-        _logger.LogInformation("[HistoryCommand] HandleInput: {Text} at Step: {Step}", text, session.Metadata.GetValueOrDefault("step", "Start"));
+        _logger.LogInformation("[HistoryCommand] HandleInput: {Text} at Step: {Step}", text,
+            session.Metadata.GetValueOrDefault("step", "Start"));
 
         if (text == _cancelButtonCallback)
         {
@@ -131,7 +131,7 @@ public class HistoryCommand : ITelegramCommand
         BotUser user,
         Message message,
         CancellationToken ct
-        )
+    )
     {
         await botClient.EditMessageText(
             message.Chat.Id,
@@ -150,14 +150,15 @@ public class HistoryCommand : ITelegramCommand
         return;
     }
 
-    private async Task FinishAsync(ITelegramBotClient botClient, Message message, BotUser user, UserSession session, CancellationToken ct)
+    private async Task FinishAsync(ITelegramBotClient botClient, Message message, BotUser user, UserSession session,
+        CancellationToken ct)
     {
         var category = Enum.Parse<ReportCategory>(session.Metadata["type"]);
         var periodMonths = int.Parse(session.Metadata["period"]);
         var format = Enum.Parse<ReportFormat>(session.Metadata["format"]);
 
         var from = DateTime.UtcNow.AddMonths(-periodMonths);
-        
+
         int? limit = format == ReportFormat.Telegram ? TelegramMaxRows : null;
 
         var reportRequest = new ReportRequest(
@@ -173,7 +174,7 @@ public class HistoryCommand : ITelegramCommand
             ChatId: message.Chat.Id
         ));
 
-        var confirmationText = format == ReportFormat.Pdf 
+        var confirmationText = format == ReportFormat.Pdf
             ? "✅ *Заявка на PDF принята.*\nГенерация файла может занять несколько секунд."
             : "✅ *Заявка принята.*\nСейчас пришлю последние данные текстом.";
 
@@ -197,15 +198,15 @@ public class HistoryCommand : ITelegramCommand
 
         return new InlineKeyboardMarkup(rows);
     }
-    
+
     private InlineKeyboardMarkup GetFormatKeyboard()
     {
         return new InlineKeyboardMarkup(new[]
         {
-            new[] 
-            { 
-                InlineKeyboardButton.WithCallbackData("📱 Текст", "report_format:Telegram"), 
-                InlineKeyboardButton.WithCallbackData("📄 PDF файл", "report_format:Pdf") 
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData("📱 Текст", "report_format:Telegram"),
+                InlineKeyboardButton.WithCallbackData("📄 PDF файл", "report_format:Pdf")
             },
             new[] { InlineKeyboardButton.WithCallbackData("❌ Отмена", _cancelButtonCallback) }
         });

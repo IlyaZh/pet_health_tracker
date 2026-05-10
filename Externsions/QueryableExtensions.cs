@@ -1,4 +1,4 @@
-using ArchieHealthTracker.Entities;
+using ArchieHealthTracker.Domain.Entities;
 using ArchieHealthTracker.Extensions.Interfaces;
 
 namespace ArchieHealthTracker.Extensions;

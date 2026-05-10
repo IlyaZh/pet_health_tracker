@@ -1,8 +1,7 @@
 using System.Text;
-using ArchieHealthTracker.Domain.Entities;
-using ArchieHealthTracker.Entities;
+using ArchieHealthTracker.Domain.Entities; 
 using ArchieHealthTracker.Extensions;
-using ArchieHealthTracker.Repositories;
+using ArchieHealthTracker.Domain.Repositories;
 
 namespace ArchieHealthTracker.Services.Reporting;
 

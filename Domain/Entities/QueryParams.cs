@@ -1,4 +1,4 @@
-namespace ArchieHealthTracker.Entities;
+namespace ArchieHealthTracker.Domain.Entities;
 
 public record QueryParams(
     int Limit,

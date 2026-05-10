@@ -1,6 +1,6 @@
 using System.Text;
-using ArchieHealthTracker.Entities;
-using ArchieHealthTracker.Repositories;
+using ArchieHealthTracker.Domain.Entities;
+using ArchieHealthTracker.Domain.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -47,6 +47,12 @@ public class ReportProcessor : BackgroundService
                 _logger.LogInformation($"[ReportProcessor] Report Generator started.");
 
                 var context = await healthService.PrepareReportContextAsync(item.Request, stoppingToken);
+                
+                _logger.LogInformation("[PdfGenerator] Received data: Weights: {W}, Medical: {M}, Symptoms: {S}", 
+                    context.WeightEntries?.Count() ?? 0, 
+                    context.MedicalEventsEntries?.Count() ?? 0, 
+                    context.SymptomEntries?.Count() ?? 0);
+
 
                 var result = await generator.GenerateAsync(context, stoppingToken);
 

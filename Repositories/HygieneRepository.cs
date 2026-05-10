@@ -1,5 +1,6 @@
 using ArchieHealthTracker.Data;
-using ArchieHealthTracker.Entities;
+using ArchieHealthTracker.Domain.Entities;
+using ArchieHealthTracker.Domain.Repositories;
 using ArchieHealthTracker.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

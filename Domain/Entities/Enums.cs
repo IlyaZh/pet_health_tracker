@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace ArchieHealthTracker.Entities;
+namespace ArchieHealthTracker.Domain.Entities;
 
 public enum ReportCategory
 {

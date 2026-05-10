@@ -1,8 +1,6 @@
-using System.Text;
 using ArchieHealthTracker.Domain.Entities;
-using ArchieHealthTracker.Entities;
 
-namespace ArchieHealthTracker.Repositories;
+namespace ArchieHealthTracker.Domain.Repositories;
 
 public interface IReportGenerator
 {

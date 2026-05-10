@@ -1,5 +1,5 @@
-using ArchieHealthTracker.Entities;
-using ArchieHealthTracker.Repositories;
+using ArchieHealthTracker.Domain.Entities;
+using ArchieHealthTracker.Domain.Repositories;
 
 
 namespace ArchieHealthTracker.Services;

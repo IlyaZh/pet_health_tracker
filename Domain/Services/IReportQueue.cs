@@ -1,6 +1,6 @@
 using ArchieHealthTracker.Domain.Entities;
 
-namespace ArchieHealthTracker.Repositories;
+namespace ArchieHealthTracker.Domain.Repositories;
 
 public interface IReportQueue
 {

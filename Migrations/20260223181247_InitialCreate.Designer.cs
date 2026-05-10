@@ -27,7 +27,7 @@ namespace ArchieHealthTracker.Migrations
             MySqlModelBuilderExtensions.HasCharSet(modelBuilder, "utf8mb4");
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("ArchieHealthTracker.Entities.BotUser", b =>
+            modelBuilder.Entity("ArchieHealthTracker.Domain.Entities.BotUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -58,7 +58,7 @@ namespace ArchieHealthTracker.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("ArchieHealthTracker.Entities.HealthEvent", b =>
+            modelBuilder.Entity("ArchieHealthTracker.Domain.Entities.HealthEvent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -93,7 +93,7 @@ namespace ArchieHealthTracker.Migrations
                     b.ToTable("health_events", (string)null);
                 });
 
-            modelBuilder.Entity("ArchieHealthTracker.Entities.HygieneEntry", b =>
+            modelBuilder.Entity("ArchieHealthTracker.Domain.Entities.HygieneEntry", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -126,7 +126,7 @@ namespace ArchieHealthTracker.Migrations
                     b.ToTable("hygiene", (string)null);
                 });
 
-            modelBuilder.Entity("ArchieHealthTracker.Entities.MedicalEventEntry", b =>
+            modelBuilder.Entity("ArchieHealthTracker.Domain.Entities.MedicalEventEntry", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -168,7 +168,7 @@ namespace ArchieHealthTracker.Migrations
                     b.ToTable("medical_events", (string)null);
                 });
 
-            modelBuilder.Entity("ArchieHealthTracker.Entities.SymptomEntry", b =>
+            modelBuilder.Entity("ArchieHealthTracker.Domain.Entities.SymptomEntry", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -198,7 +198,7 @@ namespace ArchieHealthTracker.Migrations
                     b.ToTable("symptoms", (string)null);
                 });
 
-            modelBuilder.Entity("ArchieHealthTracker.Entities.WeightEntry", b =>
+            modelBuilder.Entity("ArchieHealthTracker.Domain.Entities.WeightEntry", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -230,9 +230,9 @@ namespace ArchieHealthTracker.Migrations
                     b.ToTable("weight", (string)null);
                 });
 
-            modelBuilder.Entity("ArchieHealthTracker.Entities.HealthEvent", b =>
+            modelBuilder.Entity("ArchieHealthTracker.Domain.Entities.HealthEvent", b =>
                 {
-                    b.HasOne("ArchieHealthTracker.Entities.BotUser", "BotUser")
+                    b.HasOne("ArchieHealthTracker.Domain.Entities.BotUser", "BotUser")
                         .WithMany()
                         .HasForeignKey("BotUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -241,9 +241,9 @@ namespace ArchieHealthTracker.Migrations
                     b.Navigation("BotUser");
                 });
 
-            modelBuilder.Entity("ArchieHealthTracker.Entities.HygieneEntry", b =>
+            modelBuilder.Entity("ArchieHealthTracker.Domain.Entities.HygieneEntry", b =>
                 {
-                    b.HasOne("ArchieHealthTracker.Entities.BotUser", "User")
+                    b.HasOne("ArchieHealthTracker.Domain.Entities.BotUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -252,9 +252,9 @@ namespace ArchieHealthTracker.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ArchieHealthTracker.Entities.MedicalEventEntry", b =>
+            modelBuilder.Entity("ArchieHealthTracker.Domain.Entities.MedicalEventEntry", b =>
                 {
-                    b.HasOne("ArchieHealthTracker.Entities.BotUser", "User")
+                    b.HasOne("ArchieHealthTracker.Domain.Entities.BotUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -263,9 +263,9 @@ namespace ArchieHealthTracker.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ArchieHealthTracker.Entities.SymptomEntry", b =>
+            modelBuilder.Entity("ArchieHealthTracker.Domain.Entities.SymptomEntry", b =>
                 {
-                    b.HasOne("ArchieHealthTracker.Entities.BotUser", "User")
+                    b.HasOne("ArchieHealthTracker.Domain.Entities.BotUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -274,9 +274,9 @@ namespace ArchieHealthTracker.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ArchieHealthTracker.Entities.WeightEntry", b =>
+            modelBuilder.Entity("ArchieHealthTracker.Domain.Entities.WeightEntry", b =>
                 {
-                    b.HasOne("ArchieHealthTracker.Entities.BotUser", "User")
+                    b.HasOne("ArchieHealthTracker.Domain.Entities.BotUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

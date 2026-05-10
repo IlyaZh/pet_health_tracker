@@ -1,6 +1,7 @@
 using ArchieHealthTracker.Domain.Entities;
-using ArchieHealthTracker.Entities;
-using ArchieHealthTracker.Repositories;
+using ArchieHealthTracker.Domain.Repositories;
+using ArchieHealthTracker.Extensions;
+using QuestPDF;
 using QuestPDF.Drawing;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -17,19 +18,14 @@ public class PdfReportGenerator : IReportGenerator
         .BorderColor(Colors.Blue.Medium)
         .DefaultTextStyle(x => x.FontSize(14).SemiBold().FontColor(Colors.Blue.Medium));
 
-    static IContainer RowContainer(IContainer container) => container
-        .PaddingVertical(4)
-        .BorderBottom(1)
-        .BorderColor(Colors.Grey.Lighten3);
-
     static IContainer ValueStyle(IContainer container) => container
         .PaddingVertical(5)
         .PaddingHorizontal(5)
         .AlignLeft();
-    
+
     static PdfReportGenerator()
     {
-        QuestPDF.Settings.License = LicenseType.Community;
+        Settings.License = LicenseType.Community;
 
         var fontPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Fonts");
         FontManager.RegisterFont(File.OpenRead(Path.Combine(fontPath, "OpenSans-Regular.ttf")));
@@ -45,138 +41,109 @@ public class PdfReportGenerator : IReportGenerator
                 page.Size(PageSizes.A4);
                 page.Margin(1, Unit.Centimetre);
                 page.PageColor(Colors.White);
-
                 page.DefaultTextStyle(x => x.FontSize(12).FontFamily("Open Sans"));
 
+                // 1. Header
                 page.Header().Row(row =>
                 {
                     row.RelativeItem().Column(col =>
                     {
-                        col.Item().Text("Медицинская карта Арчи").FontSize(20).SemiBold().FontColor(Colors.Blue.Medium);
-                        col.Item().Text($"Дата отчета: {DateTime.Now:dd.MM.yyyy}");
-                        if (context.From.HasValue)
-                        {
-                            col.Item().Text($"🗓 Период: {context.From:dd.MM} — {context.To:dd.MM}");
-                        }
+                        col.Item().Text("Медицинская карта Арчи").FontSize(22).SemiBold().FontColor(Colors.Blue.Medium);
 
+                        var dataRange = context.From.HasValue
+                            ? $"🗓 период: {context.From:dd.MM.yyyy} — {context.To:dd.MM.yyyy}"
+                            : $"🗓 на дату: {DateTime.Now:dd.MM.yyyy}";
+
+                        col.Item().Text(dataRange).FontSize(10).FontColor(Colors.Grey.Darken1);
                     });
 
                     var logoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Images",
                         "paw-logo.png");
                     if (File.Exists(logoPath))
-                    {
                         row.ConstantItem(50).AlignMiddle().Image(logoPath);
-                    }
                     else
-                    {
                         row.ConstantItem(50).Placeholder();
-                    }
                 });
 
+                // 2. Content
                 page.Content().PaddingVertical(10).Column(column =>
                 {
-                    column.Spacing(10);
+                    column.Spacing(20);
 
-                    // Вес
+                    // --- ВЕС ---
                     if (context.WeightEntries?.Any() == true)
-                {
-                    column.Item().Element(SectionHeader).Text("⚖️ Антропометрия (Вес)");
-                    column.Item().Table(table =>
                     {
-                        table.ColumnsDefinition(columns =>
-                        {
-                            columns.RelativeColumn();
-                            columns.RelativeColumn();
-                            columns.RelativeColumn();
-                        });
-
-                        table.Header(header =>
-                        {
-                            header.Cell().Element(CellStyle).Text("Дата");
-                            header.Cell().Element(CellStyle).Text("Вес (кг)");
-                            header.Cell().Element(CellStyle).Text("Динамика");
-
-                            static IContainer CellStyle(IContainer container) => container.DefaultTextStyle(x => x.SemiBold()).PaddingVertical(5).BorderBottom(1);
-                        });
-
                         var weights = context.WeightEntries.OrderBy(w => w.Date).ToList();
-                        for (int i = 0; i < weights.Count; i++)
+                        var rows = new List<string[]>();
+
+                        for (var i = 0; i < weights.Count; i++)
                         {
                             var current = weights[i];
-                            var bgColor = i % 2 == 0 ? Colors.Grey.Lighten4 : Colors.White;
-
-                            table.Cell().Background(bgColor).Element(ValueStyle).Text($"{current.Date:dd.MM.yyyy}");
-                            table.Cell().Background(bgColor).Element(ValueStyle).Text($"{current.Weight.Value:F2}");
-
-                            // Считаем дельту
                             string delta = "-";
                             if (i > 0)
                             {
                                 var diff = current.Weight.Value - weights[i - 1].Weight.Value;
                                 delta = diff > 0 ? $"+{diff:F2}" : $"{diff:F2}";
                             }
-                            table.Cell().Background(bgColor).Element(ValueStyle).Text(delta).FontColor(delta.StartsWith('+') ? Colors.Red.Medium : Colors.Green.Medium);
-                        }
-                    });
-                }
 
-                    // Медицина
+                            rows.Add([current.Date.ToString("dd.MM.yyyy"), $"{current.Weight.Value:F2} кг", delta]);
+                        }
+
+                        DrawTable(column.Item(), "⚖️ Антропометрия", ["Дата", "Вес", "Δ"], rows, [false, false, false],
+                            (row, col, val) => col == 2 && val.StartsWith('+') ? Colors.Red.Medium :
+                                col == 2 && val.StartsWith('-') ? Colors.Green.Medium : Colors.Black);
+                    }
+
+                    // --- МЕДИЦИНА ---
                     if (context.MedicalEventsEntries?.Any() == true)
                     {
-                        column.Item().Text("💊 Медицинские события").FontSize(14).SemiBold();
-                        foreach (var ev in context.MedicalEventsEntries)
-                        {
-                            column.Item().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).Row(row =>
+                        var rows = context.MedicalEventsEntries
+                            .OrderByDescending(m => m.Date)
+                            .Select(m => new[]
                             {
-                                row.ConstantItem(70).Text($"{ev.Date:dd.MM.yy}");
-                                row.RelativeItem().Column(c =>
-                                {
-                                    c.Item().Text(ev.Title).SemiBold();
-                                    if (!string.IsNullOrEmpty(ev.Dosage))
-                                        c.Item().Text($"Дозировка: {ev.Dosage}").FontSize(9).Italic();
-                                });
-                            });
-                        }
+                                m.Date.ToString("dd.MM.yy"),
+                                m.Title,
+                                $"Доз: {m.Dosage ?? "-"}\nЗаметка: {m.Note ?? "-"}"
+                            }).ToList();
+
+                        DrawTable(column.Item(), "💊 Медицинские события", ["Дата", "Событие", "Детали"], rows,
+                            [false, false, true]);
                     }
 
-                    // Симптомы
+                    // --- СИМПТОМЫ ---
                     if (context.SymptomEntries?.Any() == true)
                     {
-                        column.Item().Text("🤒 Симптомы").FontSize(14).SemiBold();
-                        foreach (var ev in context.SymptomEntries)
-                        {
-                            column.Item().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).Row(row =>
+                        var rows = context.SymptomEntries
+                            .OrderByDescending(s => s.CreatedAt)
+                            .Select(s => new[]
                             {
-                                row.ConstantItem(70).Text($"{ev.CreatedAt:dd.MM.yy}");
-                                row.RelativeItem().Column(c =>
-                                {
-                                    c.Item().Text(ev.Symptom.ToString()).SemiBold();
-                                    if (!string.IsNullOrEmpty(ev.Note))
-                                        c.Item().Text($"Заметка:\n {ev.Note}").FontSize(9)
-                                            .FontColor(Colors.Grey.Darken1);
-                                });
-                            });
-                        }
+                                s.CreatedAt.ToString("dd.MM.yy"),
+                                s.Symptom.GetDescription(),
+                                s.Note ?? "-"
+                            }).ToList();
+
+                        DrawTable(column.Item(), "🤒 Симптомы", ["Дата", "Тип", "Заметка"], rows, [false, false, true]);
                     }
 
-                    // Гигиена
+                    // --- ГИГИЕНА ---
                     if (context.HygieneEntries?.Any() == true)
                     {
-                        column.Item().Text("🧼 Гигиена").FontSize(14).SemiBold();
-                        foreach (var ev in context.HygieneEntries)
-                        {
-                            column.Item().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).Row(row =>
+                        var rows = context.HygieneEntries
+                            .OrderByDescending(h => h.Date)
+                            .Select(e => new[]
                             {
-                                row.ConstantItem(70).Text($"{ev.Date:dd.MM.yy}");
-                                row.RelativeItem().Column(c => { c.Item().Text(ev.Event.ToString()).SemiBold(); });
-                            });
-                        }
+                                e.Date.ToString("dd.MM.yy"),
+                                e.Event.GetDescription()
+                            }).ToList();
+
+                        DrawTable(column.Item(), "🧼 Гигиена", ["Дата", "Процедура"], rows, [false, true]);
                     }
                 });
 
+                // 3. Footer
                 page.Footer().Column(col =>
                 {
-                    col.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
+                    col.Item().LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten2);
                     col.Item().PaddingTop(5).Row(row =>
                     {
                         row.RelativeItem().Text("Сгенерировано Archie Health Tracker").FontSize(8)
@@ -191,11 +158,46 @@ public class PdfReportGenerator : IReportGenerator
             });
         });
 
-        var pdfBytes = document.GeneratePdf();
-        return new ReportResult(
-            pdfBytes,
-            $"Archie_Report_{DateTime.Now:yyyyMMdd}.pdf",
-            ReportFormat.Pdf
-        );
+        return new ReportResult(document.GeneratePdf(), $"Archie_Report_{DateTime.Now:yyyyMMdd}.pdf", ReportFormat.Pdf);
+    }
+
+    private void DrawTable(IContainer container, string title, string[] headers, List<string[]> rows, bool[] isFlexible,
+        Func<int, int, string, Color>? colorPicker = null)
+    {
+        container.Column(col =>
+        {
+            col.Item().Element(SectionHeader).Text(title);
+            col.Item().Table(table =>
+            {
+                table.ColumnsDefinition(columns =>
+                {
+                    for (int i = 0; i < headers.Length; i++)
+                    {
+                        if (isFlexible[i]) columns.RelativeColumn(3);
+                        else columns.RelativeColumn();
+                    }
+                });
+
+                table.Header(header =>
+                {
+                    foreach (var h in headers)
+                        header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).PaddingVertical(5).Text(h)
+                            .SemiBold();
+                });
+
+                for (int i = 0; i < rows.Count; i++)
+                {
+                    var row = rows[i];
+                    var bgColor = i % 2 == 0 ? Colors.Grey.Lighten5 : Colors.White;
+
+                    for (int j = 0; j < headers.Length; j++)
+                    {
+                        var val = row[j];
+                        table.Cell().Background(bgColor).Element(ValueStyle).Text(val)
+                            .FontColor(colorPicker?.Invoke(i, j, val) ?? Colors.Black);
+                    }
+                }
+            });
+        });
     }
 }
