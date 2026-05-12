@@ -9,7 +9,6 @@ public static class QueryableExtensions
         where T : class, IHasCreatedAt
     {
         if (parameters == null) return query;
-        query = query.Take(parameters.Limit);
 
         if (parameters.From.HasValue)
         {
@@ -30,7 +29,8 @@ public static class QueryableExtensions
             query = query.OrderBy(x => x.CreatedAt);
         }
 
-        return query;
+        query = query.Take(parameters.Limit);
 
+        return query;
     }
 }
