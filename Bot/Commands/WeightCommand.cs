@@ -3,7 +3,6 @@ using ArchieHealthTracker.Bot.Interfaces;
 using ArchieHealthTracker.Domain.Entities;
 using ArchieHealthTracker.Domain.Repositories;
 using ArchieHealthTracker.Services;
-using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -12,8 +11,8 @@ namespace ArchieHealthTracker.Bot.Commands;
 public class WeightCommand : ITelegramCommand
 {
     private readonly IHealthService _healthService;
-    private readonly IUserSessionService _userSessionService;
     private readonly ILogger<WeightCommand> _logger;
+    private readonly IUserSessionService _userSessionService;
 
     public WeightCommand(
         IHealthService healthService,
@@ -47,8 +46,7 @@ public class WeightCommand : ITelegramCommand
     {
         var chatId = message.Chat.Id;
         text = text.Replace(',', '.');
-        _logger.LogInformation("[WeightCommand] Message: {text}", text);
-        _logger.LogInformation("[WeightCommand] User: {user}", user);
+        _logger.LogInformation("[WeightCommand] Processing weight input for user {UserId}", user.Id);
         var isParsed = double.TryParse(text, CultureInfo.InvariantCulture, out var weight);
         if (!isParsed)
         {

@@ -24,7 +24,7 @@ public class CommandExecutor
     public async Task ExecuteCommand(string text, ITelegramBotClient bot, Message message, BotUser user,
         CancellationToken ct)
     {
-        _logger.LogInformation("[CommandExecutor] Executing command: {text}", text);
+        _logger.LogInformation("[CommandExecutor] Processing update for user {UserId}", user.Id);
 
         if (!string.IsNullOrEmpty(text) && text.StartsWith("/"))
         {

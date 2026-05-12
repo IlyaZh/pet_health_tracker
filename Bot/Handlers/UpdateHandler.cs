@@ -66,8 +66,8 @@ public class UpdateHandler
             var (user, isNew) = await _userService.RegisterUserAsync(from.Id, from.FirstName, from.Username, ct);
             requestedUser = user;
 
-            _logger.LogInformation("Обработка сообщения от {UserId} ({Username}): {Text}", user.TelegramId,
-                from.Username, text);
+            _logger.LogInformation("Обработка сообщения от {UserId} ({Username})", user.TelegramId,
+                from.Username);
 
             await _commandExecutor.ExecuteCommand(text, botClient, message, user, ct);
         }
