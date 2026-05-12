@@ -2,6 +2,9 @@
 run:
 	docker compose up -d --build 
 
+run-debug:
+	ASPNETCORE_ENVIRONMENT=Development docker compose up -d --build
+
 logs:
 	docker compose logs -f archi_health_tracker
 

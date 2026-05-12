@@ -1,5 +1,4 @@
-﻿using System.Threading.Channels;
-using ArchieHealthTracker.Bot;
+﻿using ArchieHealthTracker.Bot;
 using ArchieHealthTracker.Bot.Handlers;
 using ArchieHealthTracker.Bot.Interfaces;
 using ArchieHealthTracker.Configuration;
@@ -10,13 +9,10 @@ using ArchieHealthTracker.Repositories;
 using ArchieHealthTracker.Services;
 using ArchieHealthTracker.Services.Reporting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
 
-var builder = Host.CreateApplicationBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 var dbConnectionString = builder.Configuration.GetConnectionString("Database");
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 0));
@@ -31,6 +27,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         );
     });
 });
+
+builder.Services.AddControllers();
 
 builder.Services.Configure<BotConfiguration>(builder.Configuration.GetSection("BotConfiguration"));
 builder.Services.AddSingleton<ITelegramBotClient>(sp =>
@@ -65,18 +63,19 @@ builder.Services.AddHostedService<ReportProcessor>();
 builder.Services.AddKeyedScoped<IReportGenerator, TelegramReportGenerator>(ReportFormat.Telegram);
 builder.Services.AddKeyedScoped<IReportGenerator, PdfReportGenerator>(ReportFormat.Pdf);
 
-builder.Services.AddScoped<UpdateHandler>();
-
-builder.Services.Configure<BotConfiguration>(builder.Configuration.GetSection("BotConfiguration"));
 builder.Services.AddHostedService<BotService>();
 
-var host = builder.Build();
+var app = builder.Build();
 
-using (var scope = host.Services.CreateScope())
+app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
     Console.WriteLine("✅ Миграции успешно применены.");
 }
 
-await host.RunAsync();
+Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");
+
+app.Run();

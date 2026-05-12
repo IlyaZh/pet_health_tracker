@@ -8,6 +8,11 @@
       - .env
     environment:
       - ConnectionStrings__DefaultConnection=Server=db;Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};CharSet=utf8mb4;
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
+      - ASPNETCORE_URLS=http://+:5000
+    ports:
+      - "8080:5000"
+    
     depends_on:
       db:
         condition: service_healthy
