@@ -8,7 +8,9 @@
       - .env
     environment:
       - ConnectionStrings__Database=Server=db;Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};CharSet=utf8mb4;
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
+      - Logging__LogLevel__Default=${LOG_LEVEL:-Debug}
+      - BotConfiguration__UpdateMode=${BOT_UPDATE_MODE:-Webhook}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
       - ASPNETCORE_URLS=http://+:5000
     ports:
       - "8080:5000"
