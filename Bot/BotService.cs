@@ -11,7 +11,7 @@ namespace ArchieHealthTracker.Bot;
 public class BotService : BackgroundService
 {
     private readonly ITelegramBotClient _botClient;
-    private readonly BotConfiguration _configuration;
+    private readonly BotConfiguration _config;
     private readonly IHostEnvironment _env;
     private readonly ILogger<BotService> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
@@ -26,25 +26,27 @@ public class BotService : BackgroundService
     {
         _botClient = botClient;
         _logger = logger;
-        _configuration = config.Value;
+        _config = config.Value;
         _scopeFactory = scopeFactory;
         _env = env;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var mode = _configuration.UpdateMode;
-        var webhookUrl = _configuration.WebhookUrl;
+        var mode = _config.UpdateMode;
+        var webhookUrl = _config.WebhookUrl;
 
         _logger.LogInformation("Starting bot in {Mode} mode", mode);
 
+
         if (UpdateMode.Webhook == mode && !string.IsNullOrEmpty(webhookUrl))
         {
-            _logger.LogInformation("Setting webhook to {Url}", _configuration.WebhookUrl);
+            _logger.LogInformation("Setting webhook to {Url}", _config.WebhookUrl);
             await _botClient.SetWebhook(
-                url: _configuration.WebhookUrl,
+                url: _config.WebhookUrl,
                 allowedUpdates: Array.Empty<UpdateType>(),
-                cancellationToken: stoppingToken
+                cancellationToken: stoppingToken,
+                secretToken: _config.SecretToken
             );
         }
         else
@@ -73,7 +75,7 @@ public class BotService : BackgroundService
     {
         using var scope = _scopeFactory.CreateScope();
 
-        var allowedUsers = _configuration.AllowedUsers;
+        var allowedUsers = _config.AllowedUsers;
 
         var handler = scope.ServiceProvider.GetRequiredService<UpdateHandler>();
 

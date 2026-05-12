@@ -12,4 +12,5 @@ public class BotConfiguration
     public string Token { get; set; } = string.Empty;
     public HashSet<long> AllowedUsers { get; set; } = new();
     public string WebhookUrl { get; set; } = string.Empty;
+    public string? SecretToken { get; set; }
 }
