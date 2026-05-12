@@ -1,5 +1,8 @@
 ﻿**/.dockerignore
-**/.env
+**/.env*
+!**/.env.example
+**/appsettings*.json
+!**/appsettings.example.json
 **/.git
 **/.gitignore
 **/.project
@@ -23,3 +26,4 @@
 **/values.dev.yaml
 LICENSE
 README.md
+Makefile

@@ -3,9 +3,6 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
-# dotenv files
-.env
-
 # User-specific files
 *.rsuser
 *.suo
@@ -481,12 +478,15 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
-bin/
-obj/
+# Custom ignores for this project
+appsettings.json
+appsettings.*.json
+!appsettings.example.json
+.env
+.env.*
+!.env.example
+*.sln.DotSettings.user
+.vscode/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
-appsettings.json
-appsettings.Development.json
-.idea/
-.env
