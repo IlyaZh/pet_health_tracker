@@ -9,20 +9,17 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<HealthEvent> Events { get; set; }
     public DbSet<WeightEntry> Weights { get; set; }
     public DbSet<HygieneEntry> Hygiene { get; set; }
-    public DbSet<SymptomEntry> Symptoms { get; set; } 
+    public DbSet<SymptomEntry> Symptoms { get; set; }
     public DbSet<MedicalEventEntry> MedicalEvents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.HasCharSet("utf8mb4")
             .UseCollation("utf8mb4_unicode_ci");
 
-        modelBuilder.Entity<HealthEvent>(entity =>
-        {
-            entity.ToTable("health_events");
-        });
+        modelBuilder.Entity<HealthEvent>(entity => { entity.ToTable("health_events"); });
 
         modelBuilder.Entity<BotUser>(entity =>
         {

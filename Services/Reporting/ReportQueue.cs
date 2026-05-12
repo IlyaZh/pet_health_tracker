@@ -1,16 +1,14 @@
 using System.Threading.Channels;
 using ArchieHealthTracker.Domain.Entities;
 using ArchieHealthTracker.Domain.Repositories;
-using Microsoft.Extensions.Logging;
 
 namespace ArchieHealthTracker.Services;
 
 public class ReportQueue : IReportQueue
 {
+    private const int BufferSize = 10;
     private readonly ILogger<ReportQueue> _logger;
     private readonly Channel<ReportQueueItem> _queue;
-    
-    private const int BufferSize = 10;
 
     public ReportQueue(
         ILogger<ReportQueue> logger

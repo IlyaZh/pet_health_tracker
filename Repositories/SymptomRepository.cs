@@ -8,8 +8,8 @@ namespace ArchieHealthTracker.Repositories;
 
 public class SymptomRepository : ISymptomRepository
 {
-    private readonly AppDbContext _dbContext; 
-    
+    private readonly AppDbContext _dbContext;
+
     public SymptomRepository(AppDbContext dbContext)
     {
         _dbContext = dbContext;

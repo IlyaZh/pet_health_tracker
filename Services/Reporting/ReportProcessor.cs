@@ -1,9 +1,6 @@
 using System.Text;
 using ArchieHealthTracker.Domain.Entities;
 using ArchieHealthTracker.Domain.Repositories;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -12,10 +9,10 @@ namespace ArchieHealthTracker.Services.Reporting;
 
 public class ReportProcessor : BackgroundService
 {
+    private readonly ITelegramBotClient _botClient;
     private readonly ILogger<ReportProcessor> _logger;
     private readonly IReportQueue _queue;
     private readonly IServiceProvider _serviceProvider;
-    private readonly ITelegramBotClient _botClient;
 
     public ReportProcessor(
         ILogger<ReportProcessor> logger,
@@ -47,10 +44,10 @@ public class ReportProcessor : BackgroundService
                 _logger.LogInformation($"[ReportProcessor] Report Generator started.");
 
                 var context = await healthService.PrepareReportContextAsync(item.Request, stoppingToken);
-                
-                _logger.LogInformation("[PdfGenerator] Received data: Weights: {W}, Medical: {M}, Symptoms: {S}", 
-                    context.WeightEntries?.Count() ?? 0, 
-                    context.MedicalEventsEntries?.Count() ?? 0, 
+
+                _logger.LogInformation("[PdfGenerator] Received data: Weights: {W}, Medical: {M}, Symptoms: {S}",
+                    context.WeightEntries?.Count() ?? 0,
+                    context.MedicalEventsEntries?.Count() ?? 0,
                     context.SymptomEntries?.Count() ?? 0);
 
 

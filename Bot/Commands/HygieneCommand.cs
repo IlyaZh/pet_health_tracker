@@ -1,7 +1,7 @@
 using ArchieHealthTracker.Bot.Interfaces;
 using ArchieHealthTracker.Domain.Entities;
-using ArchieHealthTracker.Extensions;
 using ArchieHealthTracker.Domain.Repositories;
+using ArchieHealthTracker.Extensions;
 using ArchieHealthTracker.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -11,17 +11,17 @@ namespace ArchieHealthTracker.Bot.Commands;
 
 public class HygieneCommand : ITelegramCommand
 {
-    private readonly IUserSessionService _userSessionService;
-    private readonly IHealthService _healthService;
-    public string CommandName { get; } = "/hygiene";
-
     private readonly string _chooseVariant = "Выбери процедуру для Арчи:";
+    private readonly IHealthService _healthService;
+    private readonly IUserSessionService _userSessionService;
 
     public HygieneCommand(IUserSessionService userSessionService, IHealthService healthService)
     {
         _userSessionService = userSessionService;
         _healthService = healthService;
     }
+
+    public string CommandName { get; } = "/hygiene";
 
     public async Task ExecuteAsync(ITelegramBotClient botClient, Message message, BotUser user,
         CancellationToken ct)
@@ -48,9 +48,9 @@ public class HygieneCommand : ITelegramCommand
     }
 
     public async Task HandleInputAsync(
-        ITelegramBotClient botClient, 
+        ITelegramBotClient botClient,
         UserSession session,
-        Message message, 
+        Message message,
         BotUser user,
         string text,
         CancellationToken ct)

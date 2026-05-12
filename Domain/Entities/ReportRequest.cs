@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Configuration.UserSecrets;
-
 namespace ArchieHealthTracker.Domain.Entities;
 
 public record ReportRequest(
@@ -10,5 +8,5 @@ public record ReportRequest(
     SymptomType? SymptomType = null,
     DateTime? DateFrom = null,
     DateTime? DateTo = null,
-    int? Limit  = null
-    );
+    int? Limit = null
+);

@@ -1,11 +1,10 @@
 using ArchieHealthTracker.Bot.Helpers;
 using ArchieHealthTracker.Bot.Interfaces;
 using ArchieHealthTracker.Domain.Entities;
+using ArchieHealthTracker.Domain.Repositories;
 using ArchieHealthTracker.Extensions;
 using ArchieHealthTracker.Flows;
-using ArchieHealthTracker.Domain.Repositories;
 using ArchieHealthTracker.Services;
-using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -15,15 +14,13 @@ namespace ArchieHealthTracker.Bot.Commands;
 
 public class MedicalEventCommand : ITelegramCommand
 {
-    private readonly IUserSessionService _userSessionService;
-    private readonly IHealthService _healthService;
-    private readonly ILogger<MedicalEventCommand> _logger;
+    private readonly string _cancelButtonCallback = "medical_event:cancel";
+    private readonly string _cancelButtonLabel = "❌ Отменить";
 
     private readonly string _chooseVariant = "Выбери тип события:";
-    private readonly string _cancelButtonLabel = "❌ Отменить";
-    private readonly string _cancelButtonCallback = "medical_event:cancel";
-
-    public string CommandName { get; } = "/medical_event";
+    private readonly IHealthService _healthService;
+    private readonly ILogger<MedicalEventCommand> _logger;
+    private readonly IUserSessionService _userSessionService;
 
     public MedicalEventCommand(
         IUserSessionService userSessionService,
@@ -35,6 +32,8 @@ public class MedicalEventCommand : ITelegramCommand
         _healthService = healthService;
         _logger = logger;
     }
+
+    public string CommandName { get; } = "/medical_event";
 
     public async Task ExecuteAsync(ITelegramBotClient botClient, Message message, BotUser user, CancellationToken ct)
     {
@@ -58,47 +57,6 @@ public class MedicalEventCommand : ITelegramCommand
             CommandName = CommandName,
             MessageId = sentMessage.Id,
         });
-    }
-
-    private async Task FinishAsync(
-        ITelegramBotClient botClient,
-        Message message,
-        BotUser user,
-        UserSession session,
-        CancellationToken ct
-    )
-    {
-        var isParsed = Enum.TryParse<MedicalEventType>(session.Metadata["type"].AsSpan(), out var finalType);
-        if (!isParsed)
-        {
-            throw new ArgumentException("Invalid medical_event input, not enough arguments");
-        }
-
-        session.Metadata.TryGetValue(nameof(MedicalEventStep.Dosage), out var dosage);
-        session.Metadata.TryGetValue(nameof(MedicalEventStep.Note), out var note);
-        session.Metadata.TryGetValue(nameof(MedicalEventStep.Title), out var title);
-
-        await botClient.EditMessageText(
-            message.Chat.Id,
-            session.MessageId,
-            $"✅ *Запись сохранена!*\n" +
-            $"Тип: {finalType.GetDescription()}\n" +
-            $"Название: {title}\n" +
-            $"Дозировка: {dosage ?? "-"}\n" +
-            $"Заметка: {note ?? "-"}",
-            parseMode: ParseMode.Markdown,
-            cancellationToken: ct);
-
-        var medicalEvent = new MedicalEvent
-        {
-            Type = finalType,
-            Title = title ?? "Без названия",
-            Dosage = dosage,
-            Note = note,
-        };
-        await _healthService.AddMedicalEventAsync(user, medicalEvent, ct);
-
-        _userSessionService.ClearSession(user.Id);
     }
 
     public async Task HandleInputAsync(
@@ -141,7 +99,7 @@ public class MedicalEventCommand : ITelegramCommand
 
                 await botClient.EditMessageText(message.Chat.Id, session.MessageId,
                     $"Выбрано: *{type.GetDescription()}*\n\nВведите название:",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    parseMode: ParseMode.Markdown,
                     replyMarkup: GetCancelKeyboard(), cancellationToken: ct);
                 return;
             }
@@ -159,6 +117,7 @@ public class MedicalEventCommand : ITelegramCommand
         {
             session.Metadata[currentStep.ToString()] = "";
         }
+
         _userSessionService.SetUserState(user.Id, session);
 
         var nextStep = MedicalEventFlowConfig.GetNextStep(eventType, currentStep);
@@ -173,6 +132,47 @@ public class MedicalEventCommand : ITelegramCommand
         }
 
         await FinishAsync(botClient, message, user, session, ct);
+    }
+
+    private async Task FinishAsync(
+        ITelegramBotClient botClient,
+        Message message,
+        BotUser user,
+        UserSession session,
+        CancellationToken ct
+    )
+    {
+        var isParsed = Enum.TryParse<MedicalEventType>(session.Metadata["type"].AsSpan(), out var finalType);
+        if (!isParsed)
+        {
+            throw new ArgumentException("Invalid medical_event input, not enough arguments");
+        }
+
+        session.Metadata.TryGetValue(nameof(MedicalEventStep.Dosage), out var dosage);
+        session.Metadata.TryGetValue(nameof(MedicalEventStep.Note), out var note);
+        session.Metadata.TryGetValue(nameof(MedicalEventStep.Title), out var title);
+
+        await botClient.EditMessageText(
+            message.Chat.Id,
+            session.MessageId,
+            $"✅ *Запись сохранена!*\n" +
+            $"Тип: {finalType.GetDescription()}\n" +
+            $"Название: {title}\n" +
+            $"Дозировка: {dosage ?? "-"}\n" +
+            $"Заметка: {note ?? "-"}",
+            parseMode: ParseMode.Markdown,
+            cancellationToken: ct);
+
+        var medicalEvent = new MedicalEvent
+        {
+            Type = finalType,
+            Title = title ?? "Без названия",
+            Dosage = dosage,
+            Note = note,
+        };
+        await _healthService.AddMedicalEventAsync(user, medicalEvent, ct);
+
+        _userSessionService.ClearSession(user.Id);
     }
 
     private async Task AskNextStepAsync(

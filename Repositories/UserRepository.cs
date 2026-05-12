@@ -2,7 +2,6 @@ using ArchieHealthTracker.Data;
 using ArchieHealthTracker.Domain.Entities;
 using ArchieHealthTracker.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace ArchieHealthTracker.Repositories;
 
@@ -15,7 +14,6 @@ public class UserRepository : IUserRepository
     public async Task<BotUser?> GetByTelegramIdAsync(long telegramId, CancellationToken ct)
     {
         return await _dbContext.Users.FirstOrDefaultAsync(u => u.TelegramId == telegramId, ct);
-
     }
 
     public async Task AddAsync(BotUser user, CancellationToken ct)

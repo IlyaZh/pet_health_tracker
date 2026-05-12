@@ -3,7 +3,6 @@ using ArchieHealthTracker.Domain.Entities;
 using ArchieHealthTracker.Domain.Repositories;
 using ArchieHealthTracker.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace ArchieHealthTracker.Repositories;
 
@@ -15,7 +14,7 @@ public class MedicalEventRepository : IMedicalEventRepository
     public MedicalEventRepository(
         AppDbContext dbContext,
         ILogger<MedicalEventRepository> logger
-        )
+    )
     {
         _dbContext = dbContext;
         _logger = logger;

@@ -18,8 +18,13 @@ public static class BotNavigation
     private static readonly IReadOnlyDictionary<string, string> MenuAliases = new Dictionary<string, string>
     {
         ["/menu"] = "/start",
-        ["/cancel"] = "/cancel" 
+        ["/cancel"] = "/cancel"
     };
+
+    public static IEnumerable<IEnumerable<T>> ChunkBy<T>(this IEnumerable<T> source, int size) =>
+        source.Select((x, i) => new { Index = i, Value = x })
+            .GroupBy(x => x.Index / size)
+            .Select(x => x.Select(v => v.Value).ToList());
 
     public static class Mapper
     {
@@ -41,9 +46,4 @@ public static class BotNavigation
             InputFieldPlaceholder = "Выберите действие"
         };
     }
-
-    public static IEnumerable<IEnumerable<T>> ChunkBy<T>(this IEnumerable<T> source, int size) =>
-        source.Select((x, i) => new { Index = i, Value = x })
-            .GroupBy(x => x.Index / size)
-            .Select(x => x.Select(v => v.Value).ToList());
 }

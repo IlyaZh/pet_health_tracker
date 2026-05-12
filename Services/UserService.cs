@@ -1,13 +1,12 @@
 using ArchieHealthTracker.Domain.Entities;
 using ArchieHealthTracker.Domain.Repositories;
-using Microsoft.Extensions.Logging;
 
 namespace ArchieHealthTracker.Services;
 
 public class UserService : IUserService
 {
-    private readonly IUserRepository _userRepository;
     private readonly ILogger<UserService> _logger;
+    private readonly IUserRepository _userRepository;
 
     public UserService(
         IUserRepository userRepository,
@@ -26,7 +25,7 @@ public class UserService : IUserService
         {
             return (user, false);
         }
-        
+
         _logger.LogInformation("[UserServer] new user creation");
         user = new BotUser
         {
