@@ -15,6 +15,10 @@ using Telegram.Bot;
 var builder = WebApplication.CreateBuilder(args);
 
 var dbConnectionString = builder.Configuration.GetConnectionString("Database");
+if (string.IsNullOrEmpty(dbConnectionString))
+{
+    throw new InvalidOperationException("Connection string 'Database' not found.");
+}
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 0));
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
