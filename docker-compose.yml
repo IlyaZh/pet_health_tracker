@@ -12,10 +12,12 @@
       - BotConfiguration__UpdateMode=${BOT_UPDATE_MODE:-Webhook}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
       - ASPNETCORE_URLS=http://+:5000
+      - BotConfiguration__WebhookUrl=https://wing-champion-illicitly.ngrok-free.dev/bots/dogs-health-tracker
     ports:
       - "8080:5000"
     volumes:
       - ./appsettings.json:/app/appsettings.json:ro
+      - ./Logs:/app/Logs
     
     depends_on:
       db:

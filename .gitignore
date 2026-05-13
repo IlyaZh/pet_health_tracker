@@ -490,3 +490,5 @@ appsettings.*.json
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+
+Logs/
