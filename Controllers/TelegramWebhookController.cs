@@ -19,7 +19,7 @@ public class TelegramWebhookController : ControllerBase
         _config = config.Value;
     }
 
-    [HttpPost("bots/dogs-health-tracker")]
+    [HttpPost("bot/webhook")]
     public async Task<IActionResult> Post(
         [FromHeader(Name = "X-Telegram-Bot-Api-Secret-Token")]
         string? receivedToken,
