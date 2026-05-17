@@ -1,7 +1,7 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 USER root
-RUN apt-get update && apt-get install -y libfontconfig1 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y libfontconfig1 curl && rm -rf /var/lib/apt/lists/*
 USER $APP_UID
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
