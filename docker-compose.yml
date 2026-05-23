@@ -1,23 +1,20 @@
-﻿services:
+services:
   archi_health_tracker:
-    image: archi_health_tracker
+    container_name: archie_app
+    image: archie_health_tracker:latest
     build:
       context: .
       dockerfile: Dockerfile
-    env_file:
-      - .env
+    restart: always
+    env_file: .env
     environment:
-      - ConnectionStrings__Database=Server=db;Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};CharSet=utf8mb4;
-      - Logging__LogLevel__Default=${LOG_LEVEL:-Debug}
-      - BotConfiguration__UpdateMode=${BOT_UPDATE_MODE:-Webhook}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
-      - BotConfiguration__WebhookUrl=https://wing-champion-illicitly.ngrok-free.dev/bots/dogs-health-tracker
+      - ConnectionStrings__Database=Server=db;Database=${MYSQL_DATABASE};Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};CharSet=utf8mb4;
     ports:
       - "8080:8080"
     volumes:
-      - ./appsettings.json:/app/appsettings.json:ro
+      - ./src/ArchieHealthTracker.WebService/appsettings.json:/app/appsettings.json:ro
       - ./Logs:/app/Logs
-
     depends_on:
       db:
         condition: service_healthy
@@ -26,22 +23,15 @@
     image: mysql:8.0
     container_name: archie_mysql
     restart: always
-    command:
-      [
-        "mysqld",
-        "--character-set-server=utf8mb4",
-        "--collation-server=utf8mb4_unicode_ci",
-      ]
-    env_file:
-      - .env
-    ports:
-      - "3306:3306"
+    command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    env_file: .env
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      timeout: 20s
-      retries: 10
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   db_data:
