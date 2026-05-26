@@ -1,7 +1,17 @@
 # Список фиктивных целей (чтобы не путать с файлами)
-.PHONY: run run-debug logs stop clean-db migration db-update reset-all
+.PHONY: build restore test run run-debug logs stop clean-db migration db-update reset-all
 
 # Основные команды
+restore:
+	dotnet restore ArchieHealthTracker.sln
+
+build: restore
+	dotnet build ArchieHealthTracker.sln --no-restore -c Release
+
+test:
+	@echo "No tests yet."
+	# dotnet test ArchieHealthTracker.sln --no-build -c Release
+
 run:
 	docker compose up -d --build 
 
