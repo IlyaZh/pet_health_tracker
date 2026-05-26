@@ -12,8 +12,8 @@ public static class LoggingExtensions
             .Enrich.FromLogContext()
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
             .WriteTo.File(
-                formatter: new CompactJsonFormatter(),
-                path: configuration["Logging:File:Path"] ?? "Logs/health-tracker-.log",
+                new CompactJsonFormatter(),
+                configuration["Logging:File:Path"] ?? "Logs/health-tracker-.log",
                 rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: configuration.GetValue("Logging:File:RetainedDays", 7),
                 fileSizeLimitBytes: 10 * 1024 * 1024,

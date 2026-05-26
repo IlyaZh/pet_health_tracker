@@ -17,7 +17,7 @@ public class TelegramNotificationService(
             await botClient.SendMessage(
                 chatId,
                 Encoding.UTF8.GetString((byte[])reportResult.Content),
-                parseMode: ParseMode.Markdown,
+                ParseMode.Markdown,
                 cancellationToken: ct
             );
         }
@@ -27,7 +27,7 @@ public class TelegramNotificationService(
             await botClient.SendDocument(
                 chatId,
                 InputFile.FromStream(ms, reportResult.FileName),
-                caption: "Твой отчет готов! 🐾",
+                "Твой отчет готов! 🐾",
                 cancellationToken: ct
             );
         }

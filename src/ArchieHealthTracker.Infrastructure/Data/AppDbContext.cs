@@ -37,7 +37,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.Weight)
                 .HasConversion(
                     v => v.Value,
-                    v => Weight.FromKilograms((decimal)v))
+                    v => Weight.FromKilograms(v))
                 .HasPrecision(5, 2)
                 .HasColumnType("decimal(5,2)");
             entity.HasOne(e => e.User)

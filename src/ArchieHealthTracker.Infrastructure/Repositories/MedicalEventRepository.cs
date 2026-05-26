@@ -28,10 +28,7 @@ public class MedicalEventRepository(
     {
         var query = dbContext.MedicalEvents.AsQueryable();
 
-        if (eventType.HasValue)
-        {
-            query = query.Where(x => x.Type == eventType.Value);
-        }
+        if (eventType.HasValue) query = query.Where(x => x.Type == eventType.Value);
 
         return await query.ApplyBaseParams(parameters).ToListAsync(ct);
     }

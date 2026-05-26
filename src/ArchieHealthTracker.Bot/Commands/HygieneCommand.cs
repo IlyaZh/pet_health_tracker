@@ -36,7 +36,7 @@ public class HygieneCommand(IUserSessionService userSessionService, IHealthServi
         userSessionService.SetUserState(user.Id, new UserSession
         {
             CommandName = CommandName,
-            MessageId = sentMessage.Id,
+            MessageId = sentMessage.Id
         });
     }
 
@@ -48,16 +48,11 @@ public class HygieneCommand(IUserSessionService userSessionService, IHealthServi
         string text,
         CancellationToken ct)
     {
-        if (string.IsNullOrEmpty(text))
-        {
-            return;
-        }
+        if (string.IsNullOrEmpty(text)) return;
 
         var parts = text.Split(':');
         if (parts.Length < 2 || !Enum.TryParse<HygieneEventType>(parts[1], out var type))
-        {
-            throw new ArgumentException($"Invalid hygiene input");
-        }
+            throw new ArgumentException("Invalid hygiene input");
 
         await healthService.AddHygieneAsync(user, type, ct);
         var typeName = type.GetDescription();

@@ -14,10 +14,7 @@ public class UserService(
         CancellationToken ct)
     {
         var user = await userRepository.GetByTelegramIdAsync(telegramId, ct);
-        if (user != null)
-        {
-            return (user, false);
-        }
+        if (user != null) return (user, false);
 
         logger.LogInformation("[UserServer] new user creation");
         user = new BotUser

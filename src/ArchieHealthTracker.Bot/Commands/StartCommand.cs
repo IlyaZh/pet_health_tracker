@@ -24,7 +24,7 @@ public class StartCommand(IUserSessionService userSessionService) : ITelegramCom
         await botClient.SendMessage(
             message.Chat.Id,
             text,
-            parseMode: ParseMode.Markdown,
+            ParseMode.Markdown,
             replyMarkup: BotNavigation.Keyboards.Main,
             cancellationToken: ct
         );

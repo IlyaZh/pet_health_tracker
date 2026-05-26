@@ -18,7 +18,6 @@ public class ReportProcessor(
         logger.LogInformation("[ReportProcessor] Report Processor started.");
 
         while (!ct.IsCancellationRequested)
-        {
             try
             {
                 var item = await queue.DequeueReportAsync(ct);
@@ -27,7 +26,7 @@ public class ReportProcessor(
                 var healthService = scope.ServiceProvider.GetRequiredService<IHealthService>();
                 var generator = scope.ServiceProvider.GetRequiredKeyedService<IReportGenerator>(item.Format);
 
-                logger.LogInformation($"[ReportProcessor] Report Generator started.");
+                logger.LogInformation("[ReportProcessor] Report Generator started.");
 
                 var context = await healthService.PrepareReportContextAsync(item.Request, ct);
 
@@ -47,6 +46,5 @@ public class ReportProcessor(
             {
                 logger.LogError(ex, "[ReportProcessor] Error processing report task");
             }
-        }
     }
 }

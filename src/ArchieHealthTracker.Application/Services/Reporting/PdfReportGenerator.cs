@@ -67,7 +67,7 @@ public class PdfReportGenerator : IReportGenerator
                         for (var i = 0; i < weights.Count; i++)
                         {
                             var current = weights[i];
-                            string delta = "-";
+                            var delta = "-";
                             if (i > 0)
                             {
                                 var diff = current.Weight.Value - weights[i - 1].Weight.Value;
@@ -85,7 +85,7 @@ public class PdfReportGenerator : IReportGenerator
                     // --- МЕДИЦИНА ---
                     if (context.MedicalEventsEntries?.Any() == true)
                     {
-                        var rows = Enumerable.ToList<string[]>(context.MedicalEventsEntries
+                        var rows = context.MedicalEventsEntries
                             .OrderByDescending(m => m.Date)
                             .Select(m => new[]
                             {
@@ -93,7 +93,7 @@ public class PdfReportGenerator : IReportGenerator
                                 m.Title,
                                 $"Доз: {m.Dosage ?? "-"}",
                                 $"Заметка: {m.Note ?? "-"}"
-                            }));
+                            }).ToList();
 
                         DrawTable(column.Item(), "💊 Медицинские события",
                             ["Дата", "Событие", "Дозировка", "Комментарий"], rows,
@@ -103,14 +103,14 @@ public class PdfReportGenerator : IReportGenerator
                     // --- СИМПТОМЫ ---
                     if (context.SymptomEntries?.Any() == true)
                     {
-                        var rows = Enumerable.ToList<string[]>(context.SymptomEntries
+                        var rows = context.SymptomEntries
                             .OrderByDescending(s => s.CreatedAt)
                             .Select(s => new[]
                             {
                                 s.CreatedAt.ToString("dd.MM.yy"),
                                 s.Symptom.GetDescription(),
                                 s.Note ?? "-"
-                            }));
+                            }).ToList();
 
                         DrawTable(column.Item(), "🤒 Симптомы", ["Дата", "Тип", "Заметка"], rows, [false, false, true]);
                     }
@@ -118,13 +118,13 @@ public class PdfReportGenerator : IReportGenerator
                     // --- ГИГИЕНА ---
                     if (context.HygieneEntries?.Any() == true)
                     {
-                        var rows = Enumerable.ToList<string[]>(context.HygieneEntries
+                        var rows = context.HygieneEntries
                             .OrderByDescending(h => h.Date)
                             .Select(e => new[]
                             {
                                 e.Date.ToString("dd.MM.yy"),
                                 e.Event.GetDescription()
-                            }));
+                            }).ToList();
 
                         DrawTable(column.Item(), "🧼 Гигиена", ["Дата", "Процедура"], rows, [false, true]);
                     }
@@ -151,17 +151,23 @@ public class PdfReportGenerator : IReportGenerator
         return new ReportResult(document.GeneratePdf(), $"Archie_Report_{DateTime.Now:yyyyMMdd}.pdf", ReportFormat.Pdf);
     }
 
-    static IContainer SectionHeader(IContainer container) => container
-        .PaddingTop(10)
-        .PaddingBottom(5)
-        .BorderBottom(1.5f)
-        .BorderColor(Colors.Blue.Medium)
-        .DefaultTextStyle(x => x.FontSize(14).SemiBold().FontColor(Colors.Blue.Medium));
+    private static IContainer SectionHeader(IContainer container)
+    {
+        return container
+            .PaddingTop(10)
+            .PaddingBottom(5)
+            .BorderBottom(1.5f)
+            .BorderColor(Colors.Blue.Medium)
+            .DefaultTextStyle(x => x.FontSize(14).SemiBold().FontColor(Colors.Blue.Medium));
+    }
 
-    static IContainer ValueStyle(IContainer container) => container
-        .PaddingVertical(5)
-        .PaddingHorizontal(5)
-        .AlignLeft();
+    private static IContainer ValueStyle(IContainer container)
+    {
+        return container
+            .PaddingVertical(5)
+            .PaddingHorizontal(5)
+            .AlignLeft();
+    }
 
     private void DrawTable(IContainer container, string title, string[] headers, List<string[]> rows, bool[] isFlexible,
         Func<int, int, string, Color>? colorPicker = null)
@@ -173,11 +179,9 @@ public class PdfReportGenerator : IReportGenerator
             {
                 table.ColumnsDefinition(columns =>
                 {
-                    for (int i = 0; i < headers.Length; i++)
-                    {
+                    for (var i = 0; i < headers.Length; i++)
                         if (isFlexible[i]) columns.RelativeColumn(3);
                         else columns.RelativeColumn();
-                    }
                 });
 
                 table.Header(header =>
@@ -187,12 +191,12 @@ public class PdfReportGenerator : IReportGenerator
                             .SemiBold();
                 });
 
-                for (int i = 0; i < rows.Count; i++)
+                for (var i = 0; i < rows.Count; i++)
                 {
                     var row = rows[i];
                     var bgColor = i % 2 == 0 ? Colors.Grey.Lighten5 : Colors.White;
 
-                    for (int j = 0; j < headers.Length; j++)
+                    for (var j = 0; j < headers.Length; j++)
                     {
                         var val = row[j];
                         table.Cell().Background(bgColor).Element(ValueStyle).Text(val)

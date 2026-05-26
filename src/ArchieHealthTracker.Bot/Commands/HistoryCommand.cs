@@ -51,7 +51,7 @@ public class HistoryCommand(
         var sentMessage = await botClient.SendMessage(
             message.Chat.Id,
             _chooseVariant,
-            parseMode: ParseMode.Markdown,
+            ParseMode.Markdown,
             replyMarkup: keyboard,
             cancellationToken: ct
         );
@@ -59,7 +59,7 @@ public class HistoryCommand(
         var session = new UserSession
         {
             CommandName = CommandName,
-            MessageId = sentMessage.Id,
+            MessageId = sentMessage.Id
         };
         userSessionService.SetUserState(user.Id, session);
     }
@@ -86,7 +86,7 @@ public class HistoryCommand(
 
             await botClient.EditMessageText(message.Chat.Id, session.MessageId,
                 $"📊 Тип: *{Enum.Parse<ReportCategory>(type).GetDescription()}*\n\n📅 Выберите период:",
-                parseMode: ParseMode.Markdown, replyMarkup: GetPeriodKeyboard(), cancellationToken: ct);
+                ParseMode.Markdown, GetPeriodKeyboard(), cancellationToken: ct);
             return;
         }
 
@@ -101,7 +101,7 @@ public class HistoryCommand(
             var periodText = _periods.FirstOrDefault(x => x.Value.ToString() == period).Key;
             await botClient.EditMessageText(message.Chat.Id, session.MessageId,
                 $"📅 Период: *{periodText}*\n\nОтправить как текст в чат или подготовить PDF?",
-                parseMode: ParseMode.Markdown, replyMarkup: GetFormatKeyboard(), cancellationToken: ct);
+                ParseMode.Markdown, GetFormatKeyboard(), cancellationToken: ct);
             return;
         }
 
@@ -111,7 +111,6 @@ public class HistoryCommand(
             var format = text.Split(':')[1];
             session.Metadata["format"] = format;
             await FinishAsync(botClient, message, user, session, ct);
-            return;
         }
     }
 
@@ -137,14 +136,13 @@ public class HistoryCommand(
             replyMarkup: BotNavigation.Keyboards.Main,
             cancellationToken: ct
         );
-        return;
     }
 
     private async Task FinishAsync(ITelegramBotClient botClient, Message message, BotUser user, UserSession session,
         CancellationToken ct)
     {
         var category = Enum.Parse<ReportCategory>(session.Metadata["type"]);
-        var periodMonths = int.Parse((string)session.Metadata["period"]);
+        var periodMonths = int.Parse(session.Metadata["period"]);
         var format = Enum.Parse<ReportFormat>(session.Metadata["format"]);
 
         var from = DateTime.UtcNow.AddMonths(-periodMonths);
@@ -152,8 +150,8 @@ public class HistoryCommand(
         int? limit = format == ReportFormat.Telegram ? TelegramMaxRows : null;
 
         var reportRequest = new ReportRequest(
-            TelegramId: user.TelegramId,
-            Category: category,
+            user.TelegramId,
+            category,
             DateFrom: from,
             Limit: limit
         );
@@ -172,7 +170,7 @@ public class HistoryCommand(
             message.Chat.Id,
             session.MessageId,
             confirmationText,
-            parseMode: ParseMode.Markdown,
+            ParseMode.Markdown,
             cancellationToken: ct
         );
 

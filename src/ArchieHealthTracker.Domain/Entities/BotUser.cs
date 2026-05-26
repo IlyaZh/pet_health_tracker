@@ -9,4 +9,4 @@ public class BotUser
 
     public string TimeZoneId { get; set; } = "UTC";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-};
+}

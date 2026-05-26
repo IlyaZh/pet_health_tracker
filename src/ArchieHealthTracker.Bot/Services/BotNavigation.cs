@@ -12,7 +12,7 @@ public static class BotNavigation
         ["🧼 Гигиена"] = "/hygiene",
         ["🤒 Симптомы"] = "/symptom",
         ["💊 Медицина"] = "/medical_event",
-        ["📋 Отчет"] = "/history",
+        ["📋 Отчет"] = "/history"
     };
 
     private static readonly IReadOnlyDictionary<string, string> MenuAliases = new Dictionary<string, string>
@@ -21,10 +21,12 @@ public static class BotNavigation
         ["/cancel"] = "/cancel"
     };
 
-    public static IEnumerable<IEnumerable<T>> ChunkBy<T>(this IEnumerable<T> source, int size) =>
-        source.Select((x, i) => new { Index = i, Value = x })
+    public static IEnumerable<IEnumerable<T>> ChunkBy<T>(this IEnumerable<T> source, int size)
+    {
+        return source.Select((x, i) => new { Index = i, Value = x })
             .GroupBy(x => x.Index / size)
             .Select(x => x.Select(v => v.Value).ToList());
+    }
 
     public static class Mapper
     {

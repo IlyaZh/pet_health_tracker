@@ -21,10 +21,8 @@ public class HygieneRepository(
             logger.LogInformation("Entry has already exist, skip");
             return;
         }
-        else
-        {
-            await dbContext.AddAsync(entry, ct);
-        }
+
+        await dbContext.AddAsync(entry, ct);
 
         await dbContext.SaveChangesAsync(ct);
     }
@@ -36,10 +34,7 @@ public class HygieneRepository(
     )
     {
         var query = dbContext.Hygiene.AsQueryable();
-        if (eventType.HasValue)
-        {
-            query = query.Where(x => x.Event == eventType.Value);
-        }
+        if (eventType.HasValue) query = query.Where(x => x.Event == eventType.Value);
 
         return await query.ApplyBaseParams(parameters).ToListAsync(ct);
     }

@@ -11,14 +11,38 @@ public readonly record struct Weight
 
     public decimal Value { get; }
 
-    public static Weight FromKilograms(decimal value) => new(value);
-    public static Weight FromKilograms(double value) => new((decimal)value);
+    public static Weight FromKilograms(decimal value)
+    {
+        return new Weight(value);
+    }
 
-    public static Weight operator +(Weight a, Weight b) => new(a.Value + b.Value);
-    public static Weight operator -(Weight a, Weight b) => new(a.Value - b.Value);
+    public static Weight FromKilograms(double value)
+    {
+        return new Weight((decimal)value);
+    }
 
-    public static implicit operator double(Weight weight) => (double)weight.Value;
-    public static implicit operator decimal(Weight weight) => weight.Value;
+    public static Weight operator +(Weight a, Weight b)
+    {
+        return new Weight(a.Value + b.Value);
+    }
 
-    public override string ToString() => $"{Value:F2} kg";
+    public static Weight operator -(Weight a, Weight b)
+    {
+        return new Weight(a.Value - b.Value);
+    }
+
+    public static implicit operator double(Weight weight)
+    {
+        return (double)weight.Value;
+    }
+
+    public static implicit operator decimal(Weight weight)
+    {
+        return weight.Value;
+    }
+
+    public override string ToString()
+    {
+        return $"{Value:F2} kg";
+    }
 }

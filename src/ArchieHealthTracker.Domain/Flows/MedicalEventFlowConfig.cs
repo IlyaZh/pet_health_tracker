@@ -18,7 +18,7 @@ public class MedicalEventFlowConfig
         [MedicalEventType.Vaccination] = [MedicalEventStep.Title, MedicalEventStep.Dosage, MedicalEventStep.Note],
         [MedicalEventType.ParasiteTreatment] = [MedicalEventStep.Title, MedicalEventStep.Dosage, MedicalEventStep.Note],
         [MedicalEventType.Medication] = [MedicalEventStep.Title, MedicalEventStep.Dosage, MedicalEventStep.Note],
-        [MedicalEventType.VetVisit] = [MedicalEventStep.Title, MedicalEventStep.Note],
+        [MedicalEventType.VetVisit] = [MedicalEventStep.Title, MedicalEventStep.Note]
     };
 
     public static MedicalEventStep? GetNextStep(MedicalEventType eventType, MedicalEventStep currentEventStep)

@@ -14,8 +14,8 @@ public enum ReportCategory
 
     [Description("🤒 Симптомы")] Symptom = 4,
 
-    [Description("⚖ Вес")] Weight = 5,
-};
+    [Description("⚖ Вес")] Weight = 5
+}
 
 public enum HealthEventType
 {
@@ -80,4 +80,4 @@ public enum ReportStep
     Format,
     Confirm,
     Cancel
-};
+}

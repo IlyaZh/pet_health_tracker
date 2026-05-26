@@ -22,10 +22,7 @@ public class SymptomRepository(AppDbContext dbContext) : ISymptomRepository
     {
         var query = dbContext.Symptoms.AsQueryable();
 
-        if (symptomType.HasValue)
-        {
-            query = query.Where(x => x.Symptom == symptomType);
-        }
+        if (symptomType.HasValue) query = query.Where(x => x.Symptom == symptomType);
 
         return await query.ApplyBaseParams(parameters).ToListAsync(ct);
     }

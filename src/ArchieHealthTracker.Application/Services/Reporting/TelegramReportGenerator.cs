@@ -31,30 +31,23 @@ public class TelegramReportGenerator : IReportGenerator
 
         // Handling the empty report
         if (reportBody.Length == 0)
-        {
             return new ReportResult(
                 Encoding.UTF8.GetBytes("🤷‍♂️ За указанный период записей не найдено."),
-                string.Empty,
-                ReportFormat.Telegram
+                string.Empty
             );
-        }
 
         // Compose the final message
 
         var header = new StringBuilder();
         header.AppendLine("📋 *Отчет по здоровью Арчи*");
-        if (context.From.HasValue)
-        {
-            header.AppendLine($"🗓 Период: {context.From:dd.MM.yy} — {context.To:dd.MM.yy}");
-        }
+        if (context.From.HasValue) header.AppendLine($"🗓 Период: {context.From:dd.MM.yy} — {context.To:dd.MM.yy}");
 
         header.AppendLine("────────────────────");
         header.Append(reportBody);
 
         return new ReportResult(
             Encoding.UTF8.GetBytes(header.ToString()),
-            string.Empty,
-            ReportFormat.Telegram
+            string.Empty
         );
     }
 
@@ -63,10 +56,7 @@ public class TelegramReportGenerator : IReportGenerator
         if (items == null || !items.Any()) return;
 
         sb.AppendLine($"\n{title}");
-        foreach (var item in items)
-        {
-            sb.AppendLine(formatter(item));
-        }
+        foreach (var item in items) sb.AppendLine(formatter(item));
     }
 
     private static string Escape(string text)

@@ -22,10 +22,7 @@ public class TelegramWebhookController(IOptions<ServiceConfiguration> config) : 
         CancellationToken ct
     )
     {
-        if (_config.SecretToken != receivedToken)
-        {
-            return Forbid();
-        }
+        if (_config.SecretToken != receivedToken) return Forbid();
 
         try
         {

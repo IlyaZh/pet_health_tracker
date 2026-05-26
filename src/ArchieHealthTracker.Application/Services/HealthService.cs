@@ -59,7 +59,7 @@ public class HealthService(
             Title = medicalEvent.Title,
             Dosage = medicalEvent.Dosage,
             Note = medicalEvent.Note,
-            Date = today,
+            Date = today
         };
         await medicalEventRepository.AddEventAsync(entry, ct);
     }
@@ -73,24 +73,16 @@ public class HealthService(
         List<HygieneEntry>? hygieneEntries = null;
 
         if (request.Category is ReportCategory.All or ReportCategory.MedicalEvent)
-        {
             medicalEventEntries = await medicalEventRepository.GetFilteredAsync(request.MedicalEvent, baseParams, ct);
-        }
 
         if (request.Category is ReportCategory.All or ReportCategory.Weight)
-        {
             weightEntries = await weightRepository.GetFilteredAsync(baseParams, ct);
-        }
 
         if (request.Category is ReportCategory.All or ReportCategory.Symptom)
-        {
             symptomEntries = await symptomRepository.GetFilteredAsync(request.SymptomType, baseParams, ct);
-        }
 
         if (request.Category is ReportCategory.All or ReportCategory.Hygiene)
-        {
             hygieneEntries = await hygieneRepository.GetFilteredAsync(request.HygieneEvent, baseParams, ct);
-        }
 
         var context = new ReportContext() with
         {
@@ -99,7 +91,7 @@ public class HealthService(
             MedicalEventsEntries = medicalEventEntries,
             WeightEntries = weightEntries,
             SymptomEntries = symptomEntries,
-            HygieneEntries = hygieneEntries,
+            HygieneEntries = hygieneEntries
         };
 
         return context;

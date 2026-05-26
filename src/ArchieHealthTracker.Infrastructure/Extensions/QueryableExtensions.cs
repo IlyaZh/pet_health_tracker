@@ -9,24 +9,14 @@ public static class QueryableExtensions
     {
         if (parameters == null) return query;
 
-        if (parameters.From.HasValue)
-        {
-            query = query.Where(x => x.CreatedAt >= parameters.From.Value);
-        }
+        if (parameters.From.HasValue) query = query.Where(x => x.CreatedAt >= parameters.From.Value);
 
-        if (parameters.To.HasValue)
-        {
-            query = query.Where(x => x.CreatedAt <= parameters.To.Value);
-        }
+        if (parameters.To.HasValue) query = query.Where(x => x.CreatedAt <= parameters.To.Value);
 
         if (parameters.OrderByDescending)
-        {
             query = query.OrderByDescending(x => x.CreatedAt);
-        }
         else
-        {
             query = query.OrderBy(x => x.CreatedAt);
-        }
 
         query = query.Take(parameters.Limit);
 

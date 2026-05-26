@@ -49,7 +49,7 @@ public class MedicalEventCommand(
         _userSessionService.SetUserState(user.Id, new UserSession
         {
             CommandName = CommandName,
-            MessageId = sentMessage.Id,
+            MessageId = sentMessage.Id
         });
     }
 
@@ -61,10 +61,7 @@ public class MedicalEventCommand(
         string text,
         CancellationToken ct)
     {
-        if (string.IsNullOrEmpty(text))
-        {
-            throw new ArgumentException("Invalid input");
-        }
+        if (string.IsNullOrEmpty(text)) throw new ArgumentException("Invalid input");
 
         if (text == _cancelButtonCallback)
         {
@@ -93,8 +90,8 @@ public class MedicalEventCommand(
 
                 await botClient.EditMessageText(message.Chat.Id, session.MessageId,
                     $"Выбрано: *{type.GetDescription()}*\n\nВведите название:",
-                    parseMode: ParseMode.Markdown,
-                    replyMarkup: GetCancelKeyboard(), cancellationToken: ct);
+                    ParseMode.Markdown,
+                    GetCancelKeyboard(), cancellationToken: ct);
                 return;
             }
         }
@@ -104,13 +101,9 @@ public class MedicalEventCommand(
         var eventType = Enum.Parse<MedicalEventType>(session.Metadata["type"]);
 
         if (!text.StartsWith("skip:"))
-        {
             session.Metadata[currentStep.ToString()] = text;
-        }
         else
-        {
             session.Metadata[currentStep.ToString()] = "";
-        }
 
         _userSessionService.SetUserState(user.Id, session);
 
@@ -137,11 +130,8 @@ public class MedicalEventCommand(
     )
     {
         var isParsed =
-            Enum.TryParse<MedicalEventType>(MemoryExtensions.AsSpan(session.Metadata["type"]), out var finalType);
-        if (!isParsed)
-        {
-            throw new ArgumentException("Invalid medical_event input, not enough arguments");
-        }
+            Enum.TryParse<MedicalEventType>(session.Metadata["type"].AsSpan(), out var finalType);
+        if (!isParsed) throw new ArgumentException("Invalid medical_event input, not enough arguments");
 
         session.Metadata.TryGetValue(nameof(MedicalEventStep.Dosage), out var dosage);
         session.Metadata.TryGetValue(nameof(MedicalEventStep.Note), out var note);
@@ -155,7 +145,7 @@ public class MedicalEventCommand(
             $"Название: {title}\n" +
             $"Дозировка: {dosage ?? "-"}\n" +
             $"Заметка: {note ?? "-"}",
-            parseMode: ParseMode.Markdown,
+            ParseMode.Markdown,
             cancellationToken: ct);
 
         var medicalEvent = new MedicalEvent
@@ -163,7 +153,7 @@ public class MedicalEventCommand(
             Type = finalType,
             Title = title ?? "Без названия",
             Dosage = dosage,
-            Note = note,
+            Note = note
         };
         await _healthService.AddMedicalEventAsync(user, medicalEvent, ct);
 
@@ -195,12 +185,18 @@ public class MedicalEventCommand(
     }
 
 
-    private InlineKeyboardMarkup GetCancelKeyboard() =>
-        new(InlineKeyboardButton.WithCallbackData(_cancelButtonLabel, _cancelButtonCallback));
-
-    private InlineKeyboardMarkup GetSkipAndCancelKeyboard(string step) => new(new[]
+    private InlineKeyboardMarkup GetCancelKeyboard()
     {
-        new[] { InlineKeyboardButton.WithCallbackData("⏩ Пропустить", $"skip:{step}") },
-        new[] { InlineKeyboardButton.WithCallbackData(_cancelButtonLabel, _cancelButtonCallback) }
-    });
+        return new InlineKeyboardMarkup(
+            InlineKeyboardButton.WithCallbackData(_cancelButtonLabel, _cancelButtonCallback));
+    }
+
+    private InlineKeyboardMarkup GetSkipAndCancelKeyboard(string step)
+    {
+        return new InlineKeyboardMarkup(new[]
+        {
+            new[] { InlineKeyboardButton.WithCallbackData("⏩ Пропустить", $"skip:{step}") },
+            new[] { InlineKeyboardButton.WithCallbackData(_cancelButtonLabel, _cancelButtonCallback) }
+        });
+    }
 }

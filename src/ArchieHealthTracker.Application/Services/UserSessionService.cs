@@ -8,7 +8,7 @@ public interface IUserSessionService
     public void SetUserState(Guid userId, UserSession session);
     public UserSession? GetCurrentState(Guid userId);
     public void ClearSession(Guid userId);
-};
+}
 
 public class UserSessionService(IMemoryCache cache) : IUserSessionService
 {
@@ -27,5 +27,8 @@ public class UserSessionService(IMemoryCache cache) : IUserSessionService
         cache.Remove(GetKey(userId));
     }
 
-    private string GetKey(Guid id) => $"UserSession_{id}";
+    private string GetKey(Guid id)
+    {
+        return $"UserSession_{id}";
+    }
 }

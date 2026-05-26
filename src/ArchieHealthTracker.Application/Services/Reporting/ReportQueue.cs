@@ -18,7 +18,7 @@ public class ReportQueue : IReportQueue
         _logger = logger;
         var options = new BoundedChannelOptions(BufferSize)
         {
-            FullMode = BoundedChannelFullMode.Wait,
+            FullMode = BoundedChannelFullMode.Wait
         };
         _queue = Channel.CreateBounded<ReportQueueItem>(options);
     }

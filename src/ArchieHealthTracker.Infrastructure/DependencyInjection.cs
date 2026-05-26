@@ -11,9 +11,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
     {
         if (string.IsNullOrEmpty(connectionString))
-        {
             throw new InvalidOperationException("Connection string 'Database' not found.");
-        }
 
         var serverVersion = new MySqlServerVersion(new Version(8, 0, 0));
         services.AddDbContext<AppDbContext>(options =>
@@ -21,9 +19,9 @@ public static class DependencyInjection
             options.UseMySql(connectionString, serverVersion, mysqlOptions =>
             {
                 mysqlOptions.EnableRetryOnFailure(
-                    maxRetryCount: 10,
-                    maxRetryDelay: TimeSpan.FromSeconds(5),
-                    errorNumbersToAdd: null
+                    10,
+                    TimeSpan.FromSeconds(5),
+                    null
                 );
             });
         });

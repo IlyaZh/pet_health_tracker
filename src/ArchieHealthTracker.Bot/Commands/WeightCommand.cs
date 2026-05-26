@@ -25,7 +25,7 @@ public class WeightCommand(
         userSessionService.SetUserState(user.Id, new UserSession
         {
             CommandName = CommandName,
-            MessageId = sentMessage.MessageId,
+            MessageId = sentMessage.MessageId
         });
     }
 

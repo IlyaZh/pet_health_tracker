@@ -60,10 +60,7 @@ public class UpdateHandler(
         }
         catch (ArgumentException ex)
         {
-            if (requestedUser != null)
-            {
-                userSessionService.ClearSession(requestedUser.Id);
-            }
+            if (requestedUser != null) userSessionService.ClearSession(requestedUser.Id);
 
             logger.LogError(ex, "Error handling update, argument exception");
             await botClient.SendMessage(message.Chat.Id, $"❌ {ex.Message}", cancellationToken: ct);

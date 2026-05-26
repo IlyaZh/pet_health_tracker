@@ -34,7 +34,7 @@ public class BotService(
         {
             logger.LogInformation("Setting webhook to {Url}", _config.WebhookUrl);
             await botClient.SetWebhook(
-                url: _config.WebhookUrl,
+                _config.WebhookUrl,
                 allowedUpdates: Array.Empty<UpdateType>(),
                 cancellationToken: stoppingToken,
                 secretToken: _config.SecretToken
@@ -45,13 +45,13 @@ public class BotService(
             await botClient.DeleteWebhook(cancellationToken: stoppingToken);
 
             botClient.StartReceiving(
-                updateHandler: HandleUpdateAsync,
-                errorHandler: HandlePollingErrorAsync,
-                receiverOptions: new ReceiverOptions
+                HandleUpdateAsync,
+                HandlePollingErrorAsync,
+                new ReceiverOptions
                 {
                     AllowedUpdates = []
                 },
-                cancellationToken: stoppingToken
+                stoppingToken
             );
         }
 

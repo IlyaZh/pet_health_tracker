@@ -10,7 +10,7 @@ public class MedicalEventEntry : IHasCreatedAt
 
     public MedicalEventType Type { get; set; }
 
-    [Required, MaxLength(128)] public string Title { get; set; } = string.Empty;
+    [Required] [MaxLength(128)] public string Title { get; set; } = string.Empty;
 
     [MaxLength(50)] public string? Dosage { get; set; }
 

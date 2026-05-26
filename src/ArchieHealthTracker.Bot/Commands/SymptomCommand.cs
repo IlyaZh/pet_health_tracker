@@ -38,7 +38,7 @@ public class SymptomCommand(
         userSessionService.SetUserState(user.Id, new UserSession
         {
             CommandName = CommandName,
-            MessageId = sentMessage.Id,
+            MessageId = sentMessage.Id
         });
     }
 
@@ -71,8 +71,8 @@ public class SymptomCommand(
 
                 await botClient.EditMessageText(message.Chat.Id, session.MessageId,
                     $"Выбран симптом: *{type.GetDescription()}*\n\nНапиши подробности (например, 'после прогулки') или нажми кнопку 'Пропустить':",
-                    parseMode: ParseMode.Markdown,
-                    replyMarkup: new InlineKeyboardMarkup(
+                    ParseMode.Markdown,
+                    new InlineKeyboardMarkup(
                         InlineKeyboardButton.WithCallbackData("⏩ Пропустить", "symptom:skip")),
                     cancellationToken: ct);
                 return;
@@ -80,9 +80,7 @@ public class SymptomCommand(
         }
 
         if (session.Metadata.TryGetValue("type", out var storedTypeName))
-        {
             await FinalizeSymptomAsync(botClient, session, message, user, text, ct);
-        }
     }
 
     private async Task FinalizeSymptomAsync(ITelegramBotClient botClient, UserSession session, Message message,
@@ -101,7 +99,7 @@ public class SymptomCommand(
 
             await botClient.EditMessageText(message.Chat.Id, session.MessageId,
                 $"✅ Записал симптом: *{type.GetDescription()}*\nДетали: _{note ?? "нет"}_",
-                parseMode: ParseMode.Markdown,
+                ParseMode.Markdown,
                 cancellationToken: ct);
 
             userSessionService.ClearSession(user.Id);
