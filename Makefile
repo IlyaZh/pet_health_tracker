@@ -1,3 +1,6 @@
+# Список фиктивных целей (чтобы не путать с файлами)
+.PHONY: run run-debug logs stop clean-db migration db-update reset-all
+
 # Основные команды
 run:
 	docker compose up -d --build 
@@ -6,7 +9,7 @@ run-debug:
 	ASPNETCORE_ENVIRONMENT=Development docker compose up -d --build
 
 logs:
-	docker compose logs -f archi_health_tracker
+	docker compose logs -f archie_app
 
 stop:
 	docker compose down
@@ -17,25 +20,25 @@ clean-db:
 
 # Создание новой миграции (использование: make migration name=InitialCreate)
 migration:
-	dotnet ef migrations add $(name)
+	dotnet ef migrations add $(name) --project src/ArchieHealthTracker.Infrastructure/ArchieHealthTracker.Infrastructure.csproj --startup-project src/ArchieHealthTracker.WebService/ArchieHealthTracker.WebService.csproj
 
 # Накатить миграции локально (нужен запущенный контейнер с БД)
 db-update:
-	dotnet ef database update
+	dotnet ef database update --project src/ArchieHealthTracker.Infrastructure/ArchieHealthTracker.Infrastructure.csproj --startup-project src/ArchieHealthTracker.WebService/ArchieHealthTracker.WebService.csproj
 
 # HARD RESET: Удалить базу, удалить миграции и создать всё с нуля
 reset-all: clean-db
-	rm -rf Migrations/
-	dotnet ef migrations add InitialCreate
+	rm -rf src/ArchieHealthTracker.Infrastructure/Migrations/
+	dotnet ef migrations add InitialCreate --project src/ArchieHealthTracker.Infrastructure/ArchieHealthTracker.Infrastructure.csproj --startup-project src/ArchieHealthTracker.WebService/ArchieHealthTracker.WebService.csproj
 	docker compose up -d db
 	@echo "Waiting for DB to start..."
 	sleep 10
-	dotnet ef database update
+	make db-update
 	docker compose up -d --build archi_health_tracker
 
 db-update-local:
-	@export $(shell grep -v '^#' .env | xargs) && \
-	dotnet ef database update --connection "Server=localhost;Port=3306;Database=$${MYSQL_DATABASE};Uid=root;Pwd=$${MYSQL_ROOT_PASSWORD};"
+	@export $$(grep -v '^#' src/ArchieHealthTracker.WebService/.env | xargs) && \
+	dotnet ef database update --connection "Server=localhost;Port=3306;Database=$${MYSQL_DATABASE};Uid=root;Pwd=$${MYSQL_ROOT_PASSWORD};" --project src/ArchieHealthTracker.Infrastructure/ArchieHealthTracker.Infrastructure.csproj --startup-project src/ArchieHealthTracker.WebService/ArchieHealthTracker.WebService.csproj
 	
 db-shell:
 	docker exec -it archie_mysql mysql -u root -p --default-character-set=utf8mb4 archie
