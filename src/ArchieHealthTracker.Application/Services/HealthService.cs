@@ -4,6 +4,10 @@ using ArchieHealthTracker.Domain.Interfaces.Services;
 
 namespace ArchieHealthTracker.Application.Services;
 
+/// <summary>
+/// Implementation of <see cref="IHealthService"/> that manages pet health records
+/// including weight, hygiene activities, symptoms, and medical events.
+/// </summary>
 public class HealthService(
     IWeightRepository weightRepository,
     IHygieneRepository hygieneRepository,

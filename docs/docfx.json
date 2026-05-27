@@ -7,9 +7,7 @@
           "exclude": ["**/bin/**", "**/obj/**"]
         }
       ],
-      "dest": "api",
-      "disableGitFeatures": false,
-      "disableDefaultFilter": false
+      "dest": "api"
     }
   ],
   "build": {
@@ -30,10 +28,6 @@
     "template": ["default", "modern"],
     "markdownEngineProperties": {
       "mermaid": true
-    },
-    "noLangKeyword": false,
-    "keepFileLink": false,
-    "cleanupCacheHistory": false,
-    "disableGitFeatures": false
+    }
   }
 }
