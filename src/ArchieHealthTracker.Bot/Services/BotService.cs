@@ -11,6 +11,9 @@ using Telegram.Bot.Types.Enums;
 
 namespace ArchieHealthTracker.Bot.Services;
 
+/// <summary>
+/// A background service that manages the Telegram bot lifecycle, including webhook configuration and polling.
+/// </summary>
 public class BotService(
     ITelegramBotClient botClient,
     IOptions<BotConfiguration> config,
