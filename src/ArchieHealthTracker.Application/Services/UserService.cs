@@ -5,6 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace ArchieHealthTracker.Application.Services;
 
+/// <summary>
+/// Implementation of <see cref="IUserService"/> for managing bot users.
+/// </summary>
 public class UserService(
     IUserRepository userRepository,
     ILogger<UserService> logger)
