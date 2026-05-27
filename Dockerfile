@@ -20,6 +20,10 @@ RUN dotnet publish "ArchieHealthTracker.WebService.csproj" -c Release -o /app/pu
 # Final image
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
+
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /app/publish .
 COPY src/ArchieHealthTracker.WebService/Assets ./Assets
 ENTRYPOINT ["dotnet", "ArchieHealthTracker.WebService.dll"]
