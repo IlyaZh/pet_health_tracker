@@ -8,6 +8,13 @@ restore:
 build: restore
 	dotnet build ArchieHealthTracker.sln --no-restore -c Release
 
+docs-build:
+	docfx metadata docs/docfx.json
+	docfx build docs/docfx.json
+
+docs-serve:
+	docfx docs/docfx.json --serve
+
 test:
 	@echo "No tests yet."
 	# dotnet test ArchieHealthTracker.sln --no-build -c Release

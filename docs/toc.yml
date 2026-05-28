@@ -5,4 +5,5 @@
 - name: Bot Flow
   href: bot-flow.md
 - name: API Reference
-  href: api/
+  href: api/toc.yml
+  topicHref: api/index.md

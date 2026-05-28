@@ -372,6 +372,13 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 
+# DocFX
+**/_site/
+**/obj/
+docs/api/*.yml
+docs/api/toc.yml
+!docs/api/index.md
+
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 
