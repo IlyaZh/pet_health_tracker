@@ -3,7 +3,8 @@
     {
       "src": [
         {
-          "files": ["../src/**/*.csproj"],
+          "src": "..",
+          "files": ["src/**/*.csproj"],
           "exclude": ["**/bin/**", "**/obj/**"]
         }
       ],
@@ -13,7 +14,7 @@
   "build": {
     "content": [
       {
-        "files": ["api/**.yml", "api/index.md"]
+        "files": ["api/**.yml", "api/toc.yml", "api/index.md"]
       },
       {
         "files": ["*.md", "toc.yml"]
